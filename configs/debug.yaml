@@ -1,0 +1,10 @@
+model:
+  type: 'RetinaNetResNet50'
+  min_size: 400
+  max_size: 800
+  conf_loss: SoftmaxCrossEntropy
+
+dataset:
+  train: 'COCO'
+  val: 'COCO'
+  n_fg_class: 80

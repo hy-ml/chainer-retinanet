@@ -15,12 +15,18 @@ from setup_helpers import setup_model, setup_train_chain, freeze_params
 from setup_helpers import setup_optimizer, add_hock_optimizer
 
 
+def converter(batch, device=None):
+    # do not send data to gpu (device is ignored)
+    return tuple(list(v) for v in zip(*batch))
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('config', type=str,
                         help='Path to the config file.')
     parser.add_argument('--tensorboard', type=bool, default=True,
                         help='Whether use Tensorboard. Default is True.')
+    parser.add_argument('--resume', type=str)
     args = parser.parse_args()
     return args
 
@@ -56,14 +62,16 @@ def main():
         train_dataset, cfg.n_sample_per_gpu,
         n_processes=cfg.n_sample_per_gpu // comm.size,
         shared_mem=100 * 1000 * 1000 * 4)
-    optimizer = chainermn.create_multi_node_optimizer(
-        setup_optimizer(cfg), comm)
+    # optimizer = chainermn.create_multi_node_optimizer(
+    #     setup_optimizer(cfg), comm)
+    optimizer = setup_optimizer(cfg)
+    # add_hock_optimizer(optimizer, cfg)
+    optimizer = chainermn.create_multi_node_optimizer(optimizer, comm)
     optimizer.setup(train_chain)
-    add_hock_optimizer(optimizer, cfg)
-    freeze_params(cfg, train_chain)
+    # freeze_params(cfg, train_chain)
 
     updater = training.updaters.StandardUpdater(
-        train_iter, optimizer, device=device)
+        train_iter, optimizer, device=device, converter=converter)
     trainer = training.Trainer(
         updater, (cfg.solver.n_iteration, 'iteration'),
         get_outdir(args.config))

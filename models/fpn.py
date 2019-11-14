@@ -4,7 +4,6 @@ from chainer import initializers
 import chainer.links as L
 
 
-# TODO: check to be able to use original chainercv FPN
 class FPN(chainer.Chain):
     """An extractor class of Feature Pyramid Networks.
     This class wraps a feature extractor and provides
@@ -29,7 +28,7 @@ class FPN(chainer.Chain):
             # TODO: change name
             self.convs = chainer.ChainList()  # convs for P6, P7, ...
 
-        init = {'initialW': initializers.GlorotNormal()}
+        init = {'initialW': initializers.Normal(0.01)}
         for _ in range(n_base_output):
             self.inner.append(L.Convolution2D(256, 1, **init))
             self.outer.append(L.Convolution2D(256, 3, pad=1, **init))

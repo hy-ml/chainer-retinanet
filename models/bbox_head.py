@@ -2,7 +2,7 @@ import numpy as np
 import chainer
 import chainer.functions as F
 from chainer import initializers
-from chainer.links import Convolution2D
+from chainercv.links import Conv2DActiv
 
 
 def create_fcn(out_chanels, init_options=None):
@@ -10,12 +10,19 @@ def create_fcn(out_chanels, init_options=None):
     if init_options is None:
         init_options = [None for _ in out_chanels]
     fcn = []
-    for oc, init_option in zip(out_chanels, init_options):
+    # for oc, init_option in zip(out_chanels, init_options):
+    for i in range(len(out_chanels)):
+        oc = out_chanels[i]
+        init_option = init_options[i]
+        if i + 1 < len(out_chanels):
+            activ = F.relu
+        else:
+            activ = None
         if init_option is None:
             init = default_init
         else:
             init = init_option
-        fcn.append(Convolution2D(None, oc, 3, 1, 1, **init))
+        fcn.append(Conv2DActiv(None, oc, 3, 1, 1, activ=activ, **init))
     return chainer.Sequential(*fcn)
 
 

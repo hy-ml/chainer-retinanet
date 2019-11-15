@@ -6,12 +6,13 @@ from chainercv.links.model.fpn.misc import smooth_l1
 class SmoothL1(object):
     def __init__(self, beta=1):
         self._beta = beta
+        self._eps = 1e-5
 
     def __call__(self, loc, gt_loc, gt_label):
         xp = cuda.get_array_module(loc.array)
         loc = loc[xp.where(gt_label > 0)[0]]
         gt_loc = gt_loc[xp.where(gt_label > 0)[0]]
-        n_sample = loc.shape[0] + 1e-10
+        n_sample = loc.shape[0] + self._eps
         loss = F.sum(smooth_l1(loc, gt_loc, self._beta)) / n_sample
         return loss
 
@@ -23,7 +24,7 @@ class SoftmaxCrossEntropy(object):
 
 
 class FocalLoss(object):
-    def __init__(self, alpha=0.25, gamma=2):
+    def __init__(self, alpha=0.25, gamma=2.0):
         self._alpha = alpha
         self._gamma = gamma
         self._eps = 1e-5

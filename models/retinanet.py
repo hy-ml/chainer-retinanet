@@ -9,6 +9,7 @@ class RetinaNet(Chain):
     _anchor_size = 32
     _anchor_ratios = (0.5, 1, 2)
     _anchor_scales = (1, 2**(1 / 3), 2**(2 / 3))
+    _std = (0.1, 0.2)
 
     def __init__(self, extractor, bbox_head, min_size=800, max_size=1333,
                  suppressor=None):

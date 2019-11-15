@@ -7,8 +7,6 @@ from time import time
 
 
 class RetinaNetTrainChain(chainer.Chain):
-    _std = (0.1, 0.2)
-
     def __init__(self, model, loc_loss, conf_loss, fg_thresh=0.5,
                  bg_thresh=0.4):
         super(RetinaNetTrainChain, self).__init__()
@@ -100,9 +98,9 @@ class RetinaNetTrainChain(chainer.Chain):
             loc[:, :2] += loc[:, 2:] / 2
             # offset
             loc[:, :2] = (loc[:, :2] - anchor_yx) / \
-                anchor_hw / self._std[0]
+                anchor_hw / self.model._std[0]
             loc[:, 2:] = self.xp.log(
-                (loc[:, 2:] + 1e-10) / anchor_hw) / self._std[1]
+                (loc[:, 2:] + 1e-10) / anchor_hw) / self.model._std[1]
             locs.append(loc)
 
         return locs

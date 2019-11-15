@@ -1,7 +1,7 @@
 model:
   type: 'RetinaNetResNet50'
   min_size: 600
-  conf_loss: SoftmaxCrossEntropy
+  conf_loss: SoftmaxFocalLoss
 
 dataset:
   train: 'COCO'
@@ -9,7 +9,7 @@ dataset:
   n_fg_class: 80
 
 solver:
-  base_lr: 0.0025
+  base_lr: 0.005  # 0.02 / 4
 
 n_gpu: 2
 n_sample_per_gpu: 2

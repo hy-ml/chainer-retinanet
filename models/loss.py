@@ -35,7 +35,7 @@ class FocalLoss(object):
         n_class = conf.shape[-1]
         gt_label = xp.eye(n_class + 1, dtype=xp.int32)[gt_label][:, 1:]
 
-        logit = F.log_softmax(conf)
+        logit = F.sigmoid(conf)
         logit = F.clip(logit, self._eps, 1 - self._eps)
 
         alpha_factor = xp.ones_like(gt_label, dtype=xp.float32) * self._alpha

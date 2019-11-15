@@ -66,14 +66,10 @@ class RetinaNetTrainChain(chainer.Chain):
             n_bg = self.xp.where(bg_mask)[0].shape[0]
             max_iou_indices_fg = max_iou_indices[fg_mask]
 
-            # _gt_label_fg = self.xp.array(
-            #     [gt_label[i] + 1 for i in max_iou_indices[fg_mask]],
-            #     self.xp.int32)
             _gt_label_fg = self.xp.array(
                 [gt_label[i] + 1 for i in max_iou_indices_fg],
                 self.xp.int32)
-            # _gt_bbox_fg = self.xp.array([
-            #     gt_bbox[i] for i in max_iou_indices[fg_mask]], self.xp.float32)
+
             _gt_bbox_fg = self.xp.array([
                 gt_bbox[i] for i in max_iou_indices_fg], self.xp.float32)
             if _gt_bbox_fg.shape[0] == 0:  # guard not fg anchor

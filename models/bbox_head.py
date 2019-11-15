@@ -10,7 +10,6 @@ def create_fcn(out_chanels, init_options=None):
     if init_options is None:
         init_options = [None for _ in out_chanels]
     fcn = []
-    # for oc, init_option in zip(out_chanels, init_options):
     for i in range(len(out_chanels)):
         oc = out_chanels[i]
         init_option = init_options[i]

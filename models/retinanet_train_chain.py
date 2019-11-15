@@ -1,9 +1,6 @@
-import numpy as np
 import chainer
 import chainer.functions as F
-from chainer import cuda
 from utils.bbox import calc_iou
-from time import time
 
 
 class RetinaNetTrainChain(chainer.Chain):

@@ -65,8 +65,8 @@ def main():
         shared_mem=100 * 1000 * 1000 * 4)
     optimizer = chainermn.create_multi_node_optimizer(
         setup_optimizer(cfg), comm)
-    optimizer = add_hock_optimizer(optimizer, cfg)
     optimizer = optimizer.setup(train_chain)
+    optimizer = add_hock_optimizer(optimizer, cfg)
     train_chain = freeze_params(cfg, train_chain)
 
     updater = training.updaters.StandardUpdater(

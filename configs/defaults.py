@@ -12,6 +12,7 @@ _C.model.max_size = 1333
 # loss
 _C.model.loc_loss = 'SmoothL1'
 _C.model.conf_loss = 'FocalLoss'
+_C.model.focal_loss_alpha = 0.25
 _C.model.focal_loss_gamma = 2.0
 _C.model.fg_thresh = 0.5
 _C.model.bg_thresh = 0.4

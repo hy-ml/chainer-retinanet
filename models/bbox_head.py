@@ -33,7 +33,7 @@ class BboxHead(chainer.Chain):
                 (256, 256, 256, 256, 4 * len(ratios) * len(scales)))
             self.conf = create_fcn(
                 (256, 256, 256, 256,
-                 (n_fg_class + 1) * len(ratios) * len(scales)),
+                 (n_fg_class) * len(ratios) * len(scales)),
                 [None, None, None, None, self._conf_last_init])
         self._n_fg_class = n_fg_class
 
@@ -42,7 +42,7 @@ class BboxHead(chainer.Chain):
         locs = [F.reshape(F.transpose(
             self.loc(h), (0, 2, 3, 1)), (b, -1, 4)) for h in hs]
         confs = [F.reshape(F.transpose(
-            self.conf(h), (0, 2, 3, 1)), (b, -1, self._n_fg_class + 1))
+            self.conf(h), (0, 2, 3, 1)), (b, -1, self._n_fg_class))
             for h in hs]
         locs = F.concat(locs, axis=1)
         confs = F.concat(confs, axis=1)

@@ -1,6 +1,5 @@
 import numpy as np
-import cv2
-from PIL import Image
+import chainer.functions as F
 from chainer.link import Chain
 from chainercv import transforms
 
@@ -127,6 +126,7 @@ class RetinaNet(Chain):
 
     # TODO: implement
     def _decode(self, anchors, locs, confs, scales):
+        scores = F.sigmoid(confs)
         raise NotImplementedError()
 
     # TODO: implement

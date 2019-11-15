@@ -22,22 +22,28 @@ class SoftmaxCrossEntropy(object):
         return loss
 
 
-class SoftmaxFocalLoss(object):
-    def __init__(self, gamma=2, eps=1e-7):
+class FocalLoss(object):
+    def __init__(self, alpha=0.25, gamma=2):
+        self._alpha = alpha
         self._gamma = gamma
-        self._eps = eps
+        self._eps = 1e-5
 
     def __call__(self, conf, gt_label):
-        return self._focal_loss(conf, gt_label)
+        xp = cuda.get_array_module(gt_label)
+        n_fg = max(xp.where(gt_label > 0)[0].shape[0], 1)
+        n_class = conf.shape[-1]
+        gt_label = xp.eye(n_class + 1, dtype=xp.int32)[gt_label][:, 1:]
 
-    def _focal_loss(self, x, t):
-        xp = cuda.get_array_module(t)
-        n_sample = t.shape[0]
-        n_class = x.shape[-1]
-        t = xp.eye(n_class)[t]
-        logit = F.softmax(x)
+        logit = F.log_softmax(conf)
         logit = F.clip(logit, self._eps, 1 - self._eps)
-        y = -1 * t * F.log(logit)
-        y = y * (1 - logit) ** self._gamma
-        loss = F.sum(y) / n_sample
+
+        alpha_factor = xp.ones_like(gt_label, dtype=xp.float32) * self._alpha
+        alpha_factor = F.where(gt_label == 1, alpha_factor, 1 - alpha_factor)
+        focal_weight = F.where(gt_label == 1, 1 - logit, logit)
+        focal_weight = alpha_factor * focal_weight ** self._gamma
+
+        loss = focal_weight.reshape(-1) * \
+            F.sigmoid_cross_entropy(
+                conf.reshape(-1), gt_label.reshape(-1), reduce='no')
+        loss = F.sum(loss) / n_fg
         return loss

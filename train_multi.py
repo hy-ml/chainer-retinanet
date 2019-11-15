@@ -35,6 +35,7 @@ def main():
     args = parse_args()
     cfg.merge_from_file(args.config)
     cfg.freeze()
+    print(cfg)
 
     if hasattr(multiprocessing, 'set_start_method'):
         multiprocessing.set_start_method('forkserver')
@@ -62,13 +63,11 @@ def main():
         train_dataset, cfg.n_sample_per_gpu,
         n_processes=cfg.n_sample_per_gpu // comm.size,
         shared_mem=100 * 1000 * 1000 * 4)
-    # optimizer = chainermn.create_multi_node_optimizer(
-    #     setup_optimizer(cfg), comm)
-    optimizer = setup_optimizer(cfg)
-    # add_hock_optimizer(optimizer, cfg)
-    optimizer = chainermn.create_multi_node_optimizer(optimizer, comm)
-    optimizer.setup(train_chain)
-    # freeze_params(cfg, train_chain)
+    optimizer = chainermn.create_multi_node_optimizer(
+        setup_optimizer(cfg), comm)
+    optimizer = add_hock_optimizer(optimizer, cfg)
+    optimizer = optimizer.setup(train_chain)
+    train_chain = freeze_params(cfg, train_chain)
 
     updater = training.updaters.StandardUpdater(
         train_iter, optimizer, device=device, converter=converter)

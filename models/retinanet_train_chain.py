@@ -3,6 +3,7 @@ import chainer
 import chainer.functions as F
 from chainer import cuda
 from utils.bbox import calc_iou
+from time import time
 
 
 class RetinaNetTrainChain(chainer.Chain):
@@ -20,7 +21,12 @@ class RetinaNetTrainChain(chainer.Chain):
 
     def forward(self, imgs, gt_bboxes, gt_labels):
         anchors, locs, confs, scales = self.model(imgs)
+
         gt_bboxes = self._scale_gt_bboxes(gt_bboxes, scales)
+        gt_bboxes = [self.xp.array(gt_bbox, dtype=self.xp.float32)
+                     for gt_bbox in gt_bboxes]
+        gt_labels = [self.xp.array(gt_label, dtype=self.xp.int32)
+                     for gt_label in gt_labels]
         anchors, locs, confs, gt_bboxes, gt_labels = self._asign_gt_to_anchor(
             anchors, locs, confs, gt_bboxes, gt_labels)
         gt_locs = self._convert_bbox_to_locs(anchors, gt_bboxes)
@@ -47,28 +53,43 @@ class RetinaNetTrainChain(chainer.Chain):
         _gt_bboxes = []
         for anchor, loc, conf, gt_bbox, gt_label in zip(
                 anchors, locs, confs, gt_bboxes, gt_labels):
-            iou = calc_iou(anchor, gt_bbox)
-            max_iou = self.xp.max(iou, axis=-1)
-            print(np.max(max_iou))
-            max_iou_indices = self.xp.argmax(iou, axis=-1)
-            # label 0 assign bg
-            _gt_label = np.array([gt_label[i] + 1 for i in max_iou_indices])
-            _gt_bbox = np.array([gt_bbox[i] for i in max_iou_indices])
+            if gt_label.shape[0] > 0:
+                iou = calc_iou(anchor, gt_bbox)
+                max_iou = self.xp.max(iou, axis=-1)
+                max_iou_indices = self.xp.argmax(iou, axis=-1)
+            else:  # guard no annotation
+                max_iou = self.xp.zeros(conf.shape[0], self.xp.float32)
+                max_iou_indices = self.xp.empty(conf.shape[0], self.xp.float32)
 
             fg_mask = max_iou > self._fg_thresh
             bg_mask = max_iou < self._bg_thresh
+            n_bg = self.xp.where(bg_mask)[0].shape[0]
+            max_iou_indices_fg = max_iou_indices[fg_mask]
 
-            _anchors.append(F.vstack((anchor[fg_mask], anchor[bg_mask])))
+            # _gt_label_fg = self.xp.array(
+            #     [gt_label[i] + 1 for i in max_iou_indices[fg_mask]],
+            #     self.xp.int32)
+            _gt_label_fg = self.xp.array(
+                [gt_label[i] + 1 for i in max_iou_indices_fg],
+                self.xp.int32)
+            # _gt_bbox_fg = self.xp.array([
+            #     gt_bbox[i] for i in max_iou_indices[fg_mask]], self.xp.float32)
+            _gt_bbox_fg = self.xp.array([
+                gt_bbox[i] for i in max_iou_indices_fg], self.xp.float32)
+            if _gt_bbox_fg.shape[0] == 0:  # guard not fg anchor
+                _gt_bbox_fg = self.xp.empty((0, 4), self.xp.float32)
+
+            _anchors.append(
+                F.vstack((anchor[fg_mask], anchor[bg_mask])))
             _locs.append(F.vstack((loc[fg_mask], loc[bg_mask])))
             _confs.append(F.vstack((conf[fg_mask], conf[bg_mask])))
-            _gt_bboxes.append(
-                np.vstack((_gt_bbox[fg_mask], np.zeros((np.sum(bg_mask), 4)))))
+            _gt_bboxes.append(self.xp.vstack(
+                (_gt_bbox_fg, self.xp.zeros((n_bg, 4)))))
             _gt_labels.append(
-                np.hstack((_gt_label[fg_mask], np.zeros(np.sum(bg_mask)))))
+                self.xp.hstack((_gt_label_fg, self.xp.zeros(n_bg))))
 
         return _anchors, _locs, _confs, _gt_bboxes, _gt_labels
 
-    # TODO: implement
     def _convert_bbox_to_locs(self, anchors, gt_bboxes):
 
         locs = []

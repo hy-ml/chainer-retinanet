@@ -64,7 +64,6 @@ class RetinaNet(Chain):
         mask = self._suppressor(bboxes, scores)
         return bboxes[mask], labels[mask], scores[mask]
 
-    # TODO: check implement correctly
     def anchors(self, sizes):
         anchors = []
         for l, (H, W) in enumerate(sizes):
@@ -86,20 +85,6 @@ class RetinaNet(Chain):
         anchors = self.xp.vstack(anchors)
         return anchors
 
-    # TODO: implement
-    # def _prepare(self, imgs):
-    #     x = []
-    #     for img in imgs:
-    #         # i  mg = self.xp.transpose(img, (1, 2, 0))
-    #         if isinstance(img, Image.Image):
-    #             img = np.array(img)
-    #         h, w, _ = img.shape
-    #         img = cv2.resize(img, self._img_size)
-    #         img = self.xp.array(img, dtype=self.xp.float32)
-    #         img = self.xp.transpose(img, (2, 0, 1))
-    #         x.append(img[self.xp.newaxis])
-    #     x = self.xp.vstack(x), (h, w)
-    #     return x
     def _prepare(self, imgs):
         """Preprocess images.
         Args:

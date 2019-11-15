@@ -1,7 +1,8 @@
 import re
 from models import RetinaNetResNet50, RetinaNetResNet101
 from models import RetinaNetTrainChain
-from models.loss import SmoothL1, SoftmaxCrossEntropy
+from models.loss import SmoothL1, SoftmaxCrossEntropy, SoftmaxFocalLoss
+from models.suppressor import NMS
 
 
 def setup_model(cfg):
@@ -31,8 +32,8 @@ def setup_train_chain(cfg, model):
             'Not support `loc_loss`: {}.'.format(cfg.model.loc_loss))
 
     # setup conf_loss
-    if cfg.model.conf_loss == 'FocalLoss':
-        raise NotImplementedError()
+    if cfg.model.conf_loss == 'SoftmaxFocalLoss':
+        conf_loss = SoftmaxFocalLoss(cfg.model.focal_loss_gamma)
     elif cfg.model.conf_loss == 'SoftmaxCrossEntropy':
         conf_loss = SoftmaxCrossEntropy()
     else:
@@ -45,15 +46,18 @@ def setup_train_chain(cfg, model):
 
 
 def freeze_params(cfg, train_chain):
-    freeze = cfg.solver.freeze
     for path, link in train_chain.model.namedlinks():
-        for regex in freeze:
+        for regex in cfg.model.freeze_layers:
             if re.fullmatch(regex, path):
                 link.disable_update()
                 break
     return train_chain
 
 
-# TODO: implement
 def setup_suppressor(cfg):
-    raise NotImplementedError()
+    if cfg.model.suppressor == 'NMS':
+        suppressor = NMS(cfg.model.nms_thresh)
+    else:
+        raise ValueError(
+            'Not support `suppressor`: {}.'.format(cfg.model.suppressor))
+    return suppressor

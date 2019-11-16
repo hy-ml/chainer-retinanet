@@ -41,11 +41,8 @@ class RetinaNetTrainChain(chainer.Chain):
         return gt_bboxes
 
     def _asign_gt_to_anchor(self, anchors, locs, confs, gt_bboxes, gt_labels):
-        _anchors = []
-        _locs = []
-        _confs = []
-        _gt_labels = []
-        _gt_bboxes = []
+        _anchors, _locs, _confs = [], [], []
+        _gt_labels, _gt_bboxes = [], []
         for anchor, loc, conf, gt_bbox, gt_label in zip(
                 anchors, locs, confs, gt_bboxes, gt_labels):
             if gt_label.shape[0] > 0:

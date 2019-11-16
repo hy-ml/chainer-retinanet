@@ -10,6 +10,7 @@ class RetinaNet(Chain):
     _anchor_ratios = (0.5, 1, 2)
     _anchor_scales = (1, 2**(1 / 3), 2**(2 / 3))
     _std = (0.1, 0.2)
+    _eps = 1e-5
 
     def __init__(self, extractor, bbox_head, min_size=800, max_size=1333,
                  suppressor=None):
@@ -25,10 +26,8 @@ class RetinaNet(Chain):
 
     def use_preset(self, preset):
         if preset == 'visualize':
-            self.nms_thresh = 0.5
             self.score_thresh = 0.7
         elif preset == 'evaluate':
-            self.nms_thresh = 0.5
             self.score_thresh = 0.05
         else:
             raise ValueError('preset must be visualize or evaluate')
@@ -56,11 +55,16 @@ class RetinaNet(Chain):
         return anchors, locs, confs, scales
 
     def predict(self, x):
-        x, scales = self._prepare(x)
+        x, scales, sizes = self._prepare(x)
         hs = self._forward_extractor(x)
-        anchors, locs, confs = self._forward_heads(hs)
+        anchors = self.xp.vstack([self.anchors(h.shape[2:] for h in hs)[
+                                 self.xp.newaxis] for _ in range(len(sizes))])
+        locs, confs = self._forward_heads(hs)
+        scores = F.sigmoid(F.max(confs, axis=-1))
+        labels = F.argmax(confs, -1)
 
-        bboxes, labels, scores = self._decode(anchors, confs, locs, scales)
+        anchors, locs, scores = self._remove_bg(anchors, locs, scores)
+        bboxes = self._decode(anchors, locs, scales, sizes)
         mask = self._suppressor(bboxes, scores)
         return bboxes[mask], labels[mask], scores[mask]
 
@@ -97,6 +101,7 @@ class RetinaNet(Chain):
         """
         scales = []
         resized_imgs = []
+        sizes = [(img.shape[2], img.shape[1]) for img in imgs]
         for img in imgs:
             img, scale = self._scale_img(img)
             img -= self.extractor.mean
@@ -113,7 +118,7 @@ class RetinaNet(Chain):
             x[i, :, :H, :W] = im
         x = self.xp.array(x)
 
-        return x, scales
+        return x, scales, sizes
 
     def _scale_img(self, img):
         """Process image."""
@@ -125,11 +130,40 @@ class RetinaNet(Chain):
         img = transforms.resize(img, (H, W))
         return img, scale
 
-    # TODO: implement
-    def _decode(self, anchors, locs, confs, scales):
-        scores = F.sigmoid(confs)
-        raise NotImplementedError()
+    def _remove_bg(self, anchors, locs, scores):
+        _anchors, _locs, _scores = [], [], []
+        for anchor, loc, score in zip(anchors, locs, scores):
+            mask = score > self.score_thresh
+            _anchors.append(anchor[mask])
+            _locs.append(loc[mask])
+            _scores.append(score[mask])
+        return _anchors, locs, scores
 
-    # TODO: implement
-    def _distribute(self, confs, locs):
-        raise NotImplementedError()
+    # TODO: check implement properly
+    def _decode(self, anchors, locs, scales, sizes):
+        bboxes = []
+        for i in range(len(sizes)):
+            anchor, loc, scale, size = anchors[i], locs[i], scales[i], sizes[i]
+
+            # bbox = self.xp.broadcast_to(anchor[:, None], loc.shape) / scales[i]
+            bbox = anchor
+            # tlbr -> yxhw
+            bbox[:, 2:] -= bbox[:, :2]
+            bbox[:, :2] += bbox[:, 2:] / 2
+            # offset
+            bbox[:, :2] += loc[:, :2] * bbox[:, 2:] * self._std[0]
+            bbox[:, 2:] *= self.xp.exp(
+                self.xp.minimum(loc[:, 2:] * self._std[1], self._eps))
+            # yxhw -> tlbr
+            bbox[:, :2] -= bbox[:, 2:] / 2
+            bbox[:, 2:] += bbox[:, :2]
+            # scale bbox
+            bbox = bbox / scale
+            # clip
+            bbox[:, :2] = self.xp.maximum(bbox[:, :2], 0)
+            bbox[:, 2:] = self.xp.minimum(
+                bbox[:, 2:], self.xp.array(size))
+
+            bboxes.append(bbox)
+
+        return bboxes

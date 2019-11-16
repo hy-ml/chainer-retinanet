@@ -1,3 +1,4 @@
+import numpy as np
 import chainer.functions as F
 from chainer import cuda
 from chainercv.links.model.fpn.misc import smooth_l1
@@ -33,7 +34,8 @@ class FocalLoss(object):
         xp = cuda.get_array_module(gt_label)
         n_fg = max(xp.where(gt_label > 0)[0].shape[0], 1)
         n_class = conf.shape[-1]
-        gt_label = xp.eye(n_class + 1, dtype=xp.int32)[gt_label][:, 1:]
+        gt_label = np.eye(n_class + 1, dtype=np.int32)[gt_label][:, 1:]
+        gt_label = xp.array(gt_label, dtype=xp.int32)
 
         logit = F.sigmoid(conf)
         logit = F.clip(logit, self._eps, 1 - self._eps)

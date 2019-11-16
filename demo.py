@@ -18,7 +18,7 @@ def parse_args():
     parser.add_argument('--gpu', type=int, default=0,
                         help='GPU ID. `-1` means CPU.')
     parser.add_argument('--use_preset', type=str, default='visualize',
-                        choices='visualize', 'evaluate')
+                        choices=['visualize', 'evaluate'])
     args = parser.parse_args()
     return args
 

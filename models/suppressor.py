@@ -7,7 +7,7 @@ class NMS(object):
 
     def __call__(self, bbox, score):
         selc = non_maximum_suppression(bbox, self._thresh, score)
-        return bbox[selc], score[selc]
+        return selc
 
 
 # TODO: implement

@@ -19,11 +19,8 @@ def main():
     visualizer = Visualizer('COCO')
 
     for img, bbox, label in dataset:
-        img = np.transpose(img, (1, 2, 0)).astype(np.uint8)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         result = visualizer.visualize(img, ([bbox], [label]))
 
-        cv2.imshow('input', img)
         cv2.imshow('output', result)
         key = cv2.waitKey(0) & 0xff
         if key == ord('q'):

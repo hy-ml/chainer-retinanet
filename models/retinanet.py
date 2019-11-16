@@ -1,4 +1,5 @@
 import numpy as np
+from chainer.backends import cuda
 import chainer.functions as F
 from chainer.link import Chain
 from chainercv import transforms
@@ -47,7 +48,7 @@ class RetinaNet(Chain):
             b = len(x)
         else:
             raise ValueError()
-        x, scales = self._prepare(x)
+        x, scales, _ = self._prepare(x)
         hs = self._forward_extractor(x)
         locs, confs = self._forward_heads(hs)
         anchors = self.xp.vstack([self.anchors(h.shape[2:] for h in hs)[
@@ -63,10 +64,20 @@ class RetinaNet(Chain):
         scores = F.sigmoid(F.max(confs, axis=-1))
         labels = F.argmax(confs, -1)
 
-        anchors, locs, scores = self._remove_bg(anchors, locs, scores)
+        locs = locs.array
+        labels = labels.array
+        scores = scores.array
+
+        anchors, locs, labels, scores = self._remove_bg(
+            anchors, locs, labels, scores)
         bboxes = self._decode(anchors, locs, scales, sizes)
-        mask = self._suppressor(bboxes, scores)
-        return bboxes[mask], labels[mask], scores[mask]
+        bboxes, labels, scores = self._suppress(bboxes, labels, scores)
+
+        bboxes = [cuda.to_cpu(b) for b in bboxes]
+        labels = [cuda.to_cpu(l) for l in labels]
+        scores = [cuda.to_cpu(s) for s in scores]
+
+        return bboxes, labels, scores
 
     def anchors(self, sizes):
         anchors = []
@@ -130,20 +141,25 @@ class RetinaNet(Chain):
         img = transforms.resize(img, (H, W))
         return img, scale
 
-    def _remove_bg(self, anchors, locs, scores):
-        _anchors, _locs, _scores = [], [], []
-        for anchor, loc, score in zip(anchors, locs, scores):
+    def _remove_bg(self, anchors, locs, labels, scores):
+        _anchors, _locs, _labels, _scores = [], [], [], []
+        for anchor, loc, label, score in zip(anchors, locs, labels, scores):
             mask = score > self.score_thresh
             _anchors.append(anchor[mask])
             _locs.append(loc[mask])
+            _labels.append(label[mask])
             _scores.append(score[mask])
-        return _anchors, locs, scores
+        return _anchors, _locs, _labels, _scores
 
     # TODO: check implement properly
     def _decode(self, anchors, locs, scales, sizes):
         bboxes = []
         for i in range(len(sizes)):
             anchor, loc, scale, size = anchors[i], locs[i], scales[i], sizes[i]
+            if loc.shape[0] == 0:  # guard no fg
+                bbox = self.xp.empty((0, 4), dtype=self.xp.float32)
+                bboxes.append(bbox)
+                continue
 
             # bbox = self.xp.broadcast_to(anchor[:, None], loc.shape) / scales[i]
             bbox = anchor
@@ -167,3 +183,18 @@ class RetinaNet(Chain):
             bboxes.append(bbox)
 
         return bboxes
+
+    def _suppress(self, bboxes, labels, scores):
+        _bboxes, _labels, _scores = [], [], []
+        for bbox, label, score in zip(bboxes, labels, scores):
+            if bbox.shape[0] == 0:
+                _bboxes.append(bbox)
+                _labels.append(label)
+                _scores.append(score)
+                continue
+
+            mask = self._suppressor(bbox, score)
+            _bboxes.append(bbox[mask])
+            _labels.append(label[mask])
+            _scores.append(score[mask])
+        return _bboxes, _labels, _scores

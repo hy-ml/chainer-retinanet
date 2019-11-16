@@ -8,7 +8,7 @@ class Visualizer(object):
 
     """
 
-    def __init__(self, dataset_type, thickness=2):
+    def __init__(self, dataset_type, thickness=2, input_type='rgb'):
         if dataset_type == 'COCO':
             self._label_names = coco_bbox_label_names
         elif dataset_type == 'VOC':
@@ -19,9 +19,17 @@ class Visualizer(object):
                     dataset_type))
 
         self._thickness = thickness
+        assert input_type in ['rgb', 'bgr']
+        self._input_type = input_type
 
     def visualize(self, img, outputs):
         img = img.copy()
+        if img.shape[0] == 3:
+            img = np.transpose(img, (1, 2, 0))
+        if img.dtype != np.uint8:
+            img = img.astype(np.uint8)
+        if self._input_type == 'rgb':
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
         if len(outputs) == 3:
             bboxes, labels, scores = outputs
@@ -46,7 +54,7 @@ class Visualizer(object):
         if score is None:
             score = ''
         else:
-            score = ': {.2f}'.format(score)
+            score = ': {:.2f}'.format(score)
         cat = self._label_names[label] + score
         font = cv2.FONT_HERSHEY_SIMPLEX
 

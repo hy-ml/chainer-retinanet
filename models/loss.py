@@ -32,6 +32,7 @@ class FocalLoss(object):
 
     def __call__(self, conf, gt_label):
         xp = cuda.get_array_module(gt_label)
+        gt_label = cuda.to_cpu(gt_label)
         n_fg = max(xp.where(gt_label > 0)[0].shape[0], 1)
         n_class = conf.shape[-1]
         gt_label = np.eye(n_class + 1, dtype=np.int32)[gt_label][:, 1:]

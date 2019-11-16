@@ -1,11 +1,12 @@
 import os
 import argparse
-import numpy as np
 import cv2
+from chainer import serializers
 
 from configs import cfg
 from setup_helpers import setup_model, setup_dataset
 from utils.visualizer import Visualizer
+from utils.path import get_outdir
 
 
 def parse_args():
@@ -29,6 +30,12 @@ def main():
     cfg.freeze()
 
     model = setup_model(cfg)
+    if args.model_path:
+        model_path = args.model_path
+    else:
+        model_path = os.path.join(get_outdir(
+            args.config), 'model_iter_{}'.format(cfg.solver.n_iteration))
+    serializers.load_npz(model_path, model)
     model.use_preset(args.use_preset)
     if args.gpu >= 0:
         model.to_gpu(args.gpu)

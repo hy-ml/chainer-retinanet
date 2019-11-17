@@ -10,8 +10,8 @@ dataset:
 
 solver:
   base_lr: 0.005  # 0.02 / 4
-  n_iteration: 40000
-  lr_step: [20000, 30000]
+  n_iteration: 30000
+  lr_step: [15000, 25000]
 
 n_gpu: 2
 n_sample_per_gpu: 2

@@ -1,5 +1,6 @@
 from configs.path_catalog import coco_dir
 from datasets import COCOBboxDataset
+from chainercv.datasets import VOCBboxDataset
 
 
 def setup_dataset(cfg, split):
@@ -12,6 +13,8 @@ def setup_dataset(cfg, split):
 
     if dataset_type == 'COCO':
         dataset = COCOBboxDataset(coco_dir, split)
+    elif dataset_type == 'VOC':
+        dataset = VOCBboxDataset(split=split)
     else:
         raise ValueError()
 

@@ -20,6 +20,8 @@ def parse_args():
                         help='GPU ID. `-1` means CPU.')
     parser.add_argument('--use_preset', type=str, default='visualize',
                         choices=['visualize', 'evaluate'])
+    parser.add_argument('--split', type=str, default='val',
+                        choices=['train', 'val'])
     args = parser.parse_args()
     return args
 
@@ -39,7 +41,7 @@ def main():
     model.use_preset(args.use_preset)
     if args.gpu >= 0:
         model.to_gpu(args.gpu)
-    dataset = setup_dataset(cfg, 'val')
+    dataset = setup_dataset(cfg, args.split)
     visualizer = Visualizer(cfg.dataset.val)
 
     for data in dataset:

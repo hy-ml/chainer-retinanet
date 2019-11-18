@@ -40,7 +40,7 @@ def main():
     if args.gpu >= 0:
         model.to_gpu(args.gpu)
     dataset = setup_dataset(cfg, 'val')
-    visualizer = Visualizer('COCO')
+    visualizer = Visualizer(cfg.dataset.val)
 
     for data in dataset:
         img = data[0]

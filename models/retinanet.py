@@ -29,7 +29,7 @@ class RetinaNet(Chain):
         if preset == 'visualize':
             self.score_thresh = 0.7
         elif preset == 'evaluate':
-            self.score_thresh = 0.05
+            self.score_thresh = 0.1
         else:
             raise ValueError('preset must be visualize or evaluate')
 
@@ -117,7 +117,7 @@ class RetinaNet(Chain):
         """
         scales = []
         resized_imgs = []
-        sizes = [(img.shape[2], img.shape[1]) for img in imgs]
+        sizes = [(img.shape[1], img.shape[2]) for img in imgs]
         for img in imgs:
             img, scale = self._scale_img(img)
             img -= self.extractor.mean
@@ -198,8 +198,18 @@ class RetinaNet(Chain):
                 _scores.append(score)
                 continue
 
-            mask = self._suppressor(bbox, score)
-            _bboxes.append(bbox[mask])
-            _labels.append(label[mask])
-            _scores.append(score[mask])
+            unique_label = self.xp.unique(label)
+            _bbox = self.xp.empty((0, 4), dtype=self.xp.float32)
+            _label = self.xp.empty(0, dtype=self.xp.int32)
+            _score = self.xp.empty(0, dtype=self.xp.float32)
+            for l in unique_label:
+                mask = self.xp.where(label == l)[0]
+                selc = self._suppressor(bbox[mask], score[mask])
+                _bbox = self.xp.vstack((_bbox, bbox[mask][selc]))
+                _label = self.xp.hstack((_label, label[mask][selc]))
+                _score = self.xp.hstack((_score, score[mask][selc]))
+
+            _bboxes.append(_bbox)
+            _labels.append(_label)
+            _scores.append(_score)
         return _bboxes, _labels, _scores

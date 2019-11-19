@@ -1,8 +1,8 @@
 model:
   type: 'RetinaNetResNet50'
   min_size: 600
-  max_size: 1333
-  freeze:
+  max_size: 999
+  freeze_param:
     - /.+/bn
     - /extractor/base/conv1
     - /extractor/base/res2
@@ -19,4 +19,3 @@ solver:
 
 n_gpu: 2
 n_sample_per_gpu: 2
-n_worker: 2

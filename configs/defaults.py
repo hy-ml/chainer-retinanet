@@ -19,7 +19,7 @@ _C.model.bg_thresh = 0.4
 # suppression
 _C.model.suppressor = 'NMS'
 _C.model.nms_thresh = 0.5
-_C.model.freeze = ['/.+/bn']
+_C.model.freeze_param = ['/.+/bn']
 
 # dataset
 _C.dataset = CN()
@@ -40,3 +40,4 @@ _C.solver.lr_step = [60000, 80000]
 # misc
 _C.n_gpu = 8
 _C.n_sample_per_gpu = 2
+_C.n_worker = 4

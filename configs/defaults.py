@@ -19,7 +19,7 @@ _C.model.bg_thresh = 0.4
 # suppression
 _C.model.suppressor = 'NMS'
 _C.model.nms_thresh = 0.5
-_C.model.freeze_layers = ['/.+/bn']
+_C.model.freeze = ['/.+/bn']
 
 # dataset
 _C.dataset = CN()

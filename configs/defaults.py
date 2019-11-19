@@ -40,4 +40,4 @@ _C.solver.lr_step = [60000, 80000]
 # misc
 _C.n_gpu = 8
 _C.n_sample_per_gpu = 2
-_C.n_worker = 4
+_C.n_worker = 2

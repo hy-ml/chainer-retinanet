@@ -63,6 +63,7 @@ def main():
     device = comm.intra_rank
 
     model = setup_model(cfg)
+    model = freeze_params(cfg, model)
     train_chain = setup_train_chain(cfg, model)
     chainer.cuda.get_device_from_id(device).use()
     train_chain.to_gpu()
@@ -83,7 +84,7 @@ def main():
         setup_optimizer(cfg), comm)
     optimizer = optimizer.setup(train_chain)
     optimizer = add_hock_optimizer(optimizer, cfg)
-    train_chain = freeze_params(cfg, train_chain)
+    # train_chain = freeze_params(cfg, train_chain)
 
     updater = training.updaters.StandardUpdater(
         train_iter, optimizer, device=device, converter=converter)

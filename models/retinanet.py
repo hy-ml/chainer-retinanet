@@ -34,7 +34,8 @@ class RetinaNet(Chain):
             raise ValueError('preset must be visualize or evaluate')
 
     def _forward_extractor(self, x):
-        hs = self.extractor(x)
+        with chainer.using_config('train', False):
+            hs = self.extractor(x)
         return hs
 
     def _forward_heads(self, hs):

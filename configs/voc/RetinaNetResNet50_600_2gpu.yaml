@@ -15,3 +15,4 @@ solver:
 
 n_gpu: 2
 n_sample_per_gpu: 2
+n_worker: 2

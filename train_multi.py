@@ -6,6 +6,8 @@ import chainer
 from chainer import serializers
 from chainer import training
 import chainermn
+from chainercv.chainer_experimental.datasets.sliceable import TransformDataset
+from chainercv import transforms
 
 from configs import cfg
 from utils.path import get_outdir, get_logdir
@@ -18,6 +20,19 @@ from setup_helpers import setup_optimizer, add_hock_optimizer
 def converter(batch, device=None):
     # do not send data to gpu (device is ignored)
     return tuple(list(v) for v in zip(*batch))
+
+
+class Transform(object):
+
+    def __call__(self, in_data):
+        img, bbox, label = in_data
+        # Flipping
+        img, params = transforms.random_flip(
+            img, x_random=True, return_param=True)
+        x_flip = params['x_flip']
+        bbox = transforms.flip_bbox(
+            bbox, img.shape[1:], x_flip=x_flip)
+        return img, bbox, label
 
 
 def parse_args():
@@ -52,7 +67,8 @@ def main():
     chainer.cuda.get_device_from_id(device).use()
     train_chain.to_gpu()
 
-    train_dataset = setup_dataset(cfg, 'train')
+    train_dataset = TransformDataset(
+        setup_dataset(cfg, 'train'), ('img', 'bbox', 'label'), Transform())
     if comm.rank == 0:
         indices = np.arange(len(train_dataset))
     else:

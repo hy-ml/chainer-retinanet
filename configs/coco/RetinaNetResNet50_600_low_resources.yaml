@@ -1,11 +1,7 @@
 model:
   type: 'RetinaNetResNet50'
   min_size: 600
-  max_size: 999
-  freeze_param:
-    - /.+/bn
-    - /extractor/base/conv1
-    - /extractor/base/res2
+  max_size: 1000
 
 dataset:
   train: 'COCO'

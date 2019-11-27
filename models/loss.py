@@ -1,3 +1,4 @@
+import numpy as np
 import chainer.functions as F
 from chainer import cuda
 from chainercv.links.model.fpn.misc import smooth_l1

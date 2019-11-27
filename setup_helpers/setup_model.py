@@ -49,7 +49,7 @@ def setup_train_chain(cfg, model):
 
 def freeze_params(cfg, train_chain):
     for path, link in train_chain.model.namedlinks():
-        for regex in cfg.model.freeze_layers:
+        for regex in cfg.model.freeze_param:
             if re.fullmatch(regex, path):
                 link.disable_update()
                 break

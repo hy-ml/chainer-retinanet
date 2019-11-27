@@ -4,12 +4,14 @@ model:
   max_size: 999
 
 dataset:
-  train: 'COCO'
-  val: 'COCO'
-  n_fg_class: 80
+  train: 'VOC'
+  val: 'VOC'
+  n_fg_class: 20
 
 solver:
   base_lr: 0.005  # 0.02 / 4
+  n_iteration: 60000
+  lr_step: [40000, 50000]
 
 n_gpu: 2
 n_sample_per_gpu: 2

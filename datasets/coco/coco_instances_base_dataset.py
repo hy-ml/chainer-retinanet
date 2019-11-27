@@ -1,14 +1,13 @@
 from collections import defaultdict
 import json
 import numpy as np
-# import cv2
 import os
 import PIL.Image
 import PIL.ImageDraw
 
-from chainercv import utils
 from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
 from chainercv.datasets.coco.coco_utils import get_coco
+from chainercv import utils
 
 try:
     from pycocotools import mask as coco_mask
@@ -67,9 +66,6 @@ class COCOInstancesBaseDataset(GetterDataset):
         img_path = os.path.join(
             self.img_root, self.id_to_prop[self.ids[i]]['file_name'])
         img = utils.read_image(img_path, dtype=np.float32, color=True)
-        # img = cv2.imread(img_path)
-        img = img[:, :, ::-1]  # BGR -> RGB
-
         return img
 
     def _get_mask(self, i):

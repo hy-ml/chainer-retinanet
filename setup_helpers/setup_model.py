@@ -47,13 +47,12 @@ def setup_train_chain(cfg, model):
     return train_chain
 
 
-def freeze_params(cfg, train_chain):
-    for path, link in train_chain.model.namedlinks():
+def freeze_params(cfg, model):
+    for path, link in model.namedlinks():
         for regex in cfg.model.freeze_param:
             if re.fullmatch(regex, path):
                 link.disable_update()
                 break
-    return train_chain
 
 
 def setup_suppressor(cfg):

@@ -1,7 +1,7 @@
 import re
 from models import RetinaNetResNet50, RetinaNetResNet101
 from models import RetinaNetTrainChain
-from models.loss import SmoothL1, SoftmaxCrossEntropy, SoftmaxFocalLoss
+from models.loss import SmoothL1, SoftmaxCrossEntropy, FocalLoss
 from models.suppressor import NMS
 
 
@@ -32,8 +32,10 @@ def setup_train_chain(cfg, model):
             'Not support `loc_loss`: {}.'.format(cfg.model.loc_loss))
 
     # setup conf_loss
-    if cfg.model.conf_loss == 'SoftmaxFocalLoss':
-        conf_loss = SoftmaxFocalLoss(cfg.model.focal_loss_gamma)
+    if cfg.model.conf_loss == 'FocalLoss':
+        conf_loss = FocalLoss(
+            cfg.model.focal_loss_alpha,
+            cfg.model.focal_loss_gamma)
     elif cfg.model.conf_loss == 'SoftmaxCrossEntropy':
         conf_loss = SoftmaxCrossEntropy()
     else:
@@ -47,7 +49,7 @@ def setup_train_chain(cfg, model):
 
 def freeze_params(cfg, train_chain):
     for path, link in train_chain.model.namedlinks():
-        for regex in cfg.model.freeze_layers:
+        for regex in cfg.model.freeze_param:
             if re.fullmatch(regex, path):
                 link.disable_update()
                 break

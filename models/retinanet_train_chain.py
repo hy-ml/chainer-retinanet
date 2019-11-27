@@ -1,14 +1,9 @@
-import numpy as np
 import chainer
 import chainer.functions as F
-from chainer import cuda
 from utils.bbox import calc_iou
-from time import time
 
 
 class RetinaNetTrainChain(chainer.Chain):
-    _std = (0.1, 0.2)
-
     def __init__(self, model, loc_loss, conf_loss, fg_thresh=0.5,
                  bg_thresh=0.4):
         super(RetinaNetTrainChain, self).__init__()
@@ -46,11 +41,8 @@ class RetinaNetTrainChain(chainer.Chain):
         return gt_bboxes
 
     def _asign_gt_to_anchor(self, anchors, locs, confs, gt_bboxes, gt_labels):
-        _anchors = []
-        _locs = []
-        _confs = []
-        _gt_labels = []
-        _gt_bboxes = []
+        _anchors, _locs, _confs = [], [], []
+        _gt_labels, _gt_bboxes = [], []
         for anchor, loc, conf, gt_bbox, gt_label in zip(
                 anchors, locs, confs, gt_bboxes, gt_labels):
             if gt_label.shape[0] > 0:
@@ -66,14 +58,10 @@ class RetinaNetTrainChain(chainer.Chain):
             n_bg = self.xp.where(bg_mask)[0].shape[0]
             max_iou_indices_fg = max_iou_indices[fg_mask]
 
-            # _gt_label_fg = self.xp.array(
-            #     [gt_label[i] + 1 for i in max_iou_indices[fg_mask]],
-            #     self.xp.int32)
             _gt_label_fg = self.xp.array(
                 [gt_label[i] + 1 for i in max_iou_indices_fg],
                 self.xp.int32)
-            # _gt_bbox_fg = self.xp.array([
-            #     gt_bbox[i] for i in max_iou_indices[fg_mask]], self.xp.float32)
+
             _gt_bbox_fg = self.xp.array([
                 gt_bbox[i] for i in max_iou_indices_fg], self.xp.float32)
             if _gt_bbox_fg.shape[0] == 0:  # guard not fg anchor
@@ -104,9 +92,9 @@ class RetinaNetTrainChain(chainer.Chain):
             loc[:, :2] += loc[:, 2:] / 2
             # offset
             loc[:, :2] = (loc[:, :2] - anchor_yx) / \
-                anchor_hw / self._std[0]
+                anchor_hw / self.model._std[0]
             loc[:, 2:] = self.xp.log(
-                (loc[:, 2:] + 1e-10) / anchor_hw) / self._std[1]
+                (loc[:, 2:] + 1e-10) / anchor_hw) / self.model._std[1]
             locs.append(loc)
 
         return locs

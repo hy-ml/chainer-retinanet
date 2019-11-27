@@ -12,13 +12,14 @@ _C.model.max_size = 1333
 # loss
 _C.model.loc_loss = 'SmoothL1'
 _C.model.conf_loss = 'FocalLoss'
+_C.model.focal_loss_alpha = 0.25
 _C.model.focal_loss_gamma = 2.0
 _C.model.fg_thresh = 0.5
 _C.model.bg_thresh = 0.4
 # suppression
 _C.model.suppressor = 'NMS'
 _C.model.nms_thresh = 0.5
-_C.model.freeze_layers = ['/.+/bn']
+_C.model.freeze_param = ['/.+/bn']
 
 # dataset
 _C.dataset = CN()
@@ -39,3 +40,4 @@ _C.solver.lr_step = [60000, 80000]
 # misc
 _C.n_gpu = 8
 _C.n_sample_per_gpu = 2
+_C.n_worker = 2

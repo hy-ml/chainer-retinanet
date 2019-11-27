@@ -47,8 +47,6 @@ def main():
     train_dataset = setup_dataset(cfg, 'train')
     train_iter = chainer.iterators.MultithreadIterator(
         train_dataset, cfg.n_sample_per_gpu)
-    # optimizer = chainermn.create_multi_node_optimizer(
-    #     setup_optimizer(cfg), comm)
     optimizer = setup_optimizer(cfg)
     optimizer.setup(train_chain)
     add_hock_optimizer(optimizer, cfg)

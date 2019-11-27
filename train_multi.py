@@ -61,12 +61,12 @@ def main():
     train_dataset = train_dataset.slice[indices]
     train_iter = chainer.iterators.MultiprocessIterator(
         train_dataset, cfg.n_sample_per_gpu,
-        n_processes=cfg.n_sample_per_gpu // comm.size,
+        n_processes=cfg.n_worker,
         shared_mem=100 * 1000 * 1000 * 4)
     optimizer = chainermn.create_multi_node_optimizer(
         setup_optimizer(cfg), comm)
-    optimizer = add_hock_optimizer(optimizer, cfg)
     optimizer = optimizer.setup(train_chain)
+    optimizer = add_hock_optimizer(optimizer, cfg)
     train_chain = freeze_params(cfg, train_chain)
 
     updater = training.updaters.StandardUpdater(

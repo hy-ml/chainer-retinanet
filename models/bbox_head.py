@@ -2,7 +2,7 @@ import numpy as np
 import chainer
 import chainer.functions as F
 from chainer import initializers
-from chainer.links import Convolution2D
+from chainercv.links import Conv2DActiv
 
 
 def create_fcn(out_chanels, init_options=None):
@@ -10,12 +10,18 @@ def create_fcn(out_chanels, init_options=None):
     if init_options is None:
         init_options = [None for _ in out_chanels]
     fcn = []
-    for oc, init_option in zip(out_chanels, init_options):
+    for i in range(len(out_chanels)):
+        oc = out_chanels[i]
+        init_option = init_options[i]
+        if i + 1 < len(out_chanels):
+            activ = F.relu
+        else:
+            activ = None
         if init_option is None:
             init = default_init
         else:
             init = init_option
-        fcn.append(Convolution2D(None, oc, 3, 1, 1, **init))
+        fcn.append(Conv2DActiv(None, oc, 3, 1, 1, activ=activ, **init))
     return chainer.Sequential(*fcn)
 
 
@@ -33,7 +39,7 @@ class BboxHead(chainer.Chain):
                 (256, 256, 256, 256, 4 * len(ratios) * len(scales)))
             self.conf = create_fcn(
                 (256, 256, 256, 256,
-                 (n_fg_class + 1) * len(ratios) * len(scales)),
+                 (n_fg_class) * len(ratios) * len(scales)),
                 [None, None, None, None, self._conf_last_init])
         self._n_fg_class = n_fg_class
 
@@ -42,7 +48,7 @@ class BboxHead(chainer.Chain):
         locs = [F.reshape(F.transpose(
             self.loc(h), (0, 2, 3, 1)), (b, -1, 4)) for h in hs]
         confs = [F.reshape(F.transpose(
-            self.conf(h), (0, 2, 3, 1)), (b, -1, self._n_fg_class + 1))
+            self.conf(h), (0, 2, 3, 1)), (b, -1, self._n_fg_class))
             for h in hs]
         locs = F.concat(locs, axis=1)
         confs = F.concat(confs, axis=1)

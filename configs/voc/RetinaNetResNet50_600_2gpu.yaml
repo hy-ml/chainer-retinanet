@@ -1,7 +1,7 @@
 model:
   type: 'RetinaNetResNet50'
   min_size: 600
-  max_size: 999
+  max_size: 1000
 
 dataset:
   train: 'VOC'

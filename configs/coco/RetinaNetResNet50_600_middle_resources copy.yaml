@@ -1,0 +1,19 @@
+model:
+  type: 'RetinaNetResNet50'
+  min_size: 600
+  max_size: 999
+  freeze_param:
+    - /.+/bn
+
+dataset:
+  train: 'COCO'
+  val: 'COCO'
+  n_fg_class: 80
+
+solver:
+  base_lr: 0.0025  # 0.02 / 8
+  n_iteration: 180000
+  lr_step: [120000, 160000]
+
+n_gpu: 2
+n_sample_per_gpu: 4

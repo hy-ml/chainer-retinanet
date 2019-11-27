@@ -23,7 +23,6 @@ class Visualizer(object):
         self._input_type = input_type
 
     def visualize(self, img, outputs):
-        img = img.copy()
         if img.shape[0] == 3:
             img = np.transpose(img, (1, 2, 0))
         if img.dtype != np.uint8:
@@ -36,6 +35,8 @@ class Visualizer(object):
         elif len(outputs) == 2:
             bboxes, labels = outputs
             scores = [[None for _ in range(bboxes[0].shape[0])]]
+        else:
+            raise ValueError()
         bboxes = bboxes[0].astype(np.int)
         labels = labels[0]
         scores = scores[0]

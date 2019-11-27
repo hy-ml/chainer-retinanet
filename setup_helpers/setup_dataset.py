@@ -1,5 +1,6 @@
 from configs.path_catalog import coco_dir
-from datasets import COCOBboxDataset
+# from datasets import COCOBboxDataset
+from chainercv.datasets import COCOBboxDataset
 from chainercv.datasets import VOCBboxDataset
 
 

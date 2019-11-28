@@ -1,4 +1,4 @@
-from chainer.optimizer_hooks import WeightDecay
+from chainer.optimizer_hooks import WeightDecay, GradientClipping
 from chainer.optimizers import SGD, MomentumSGD
 
 
@@ -13,15 +13,17 @@ def setup_optimizer(cfg):
     return optimizer
 
 
-def add_hock_optimizer(optimizer, cfg):
+def add_hook_optimizer(optimizer, cfg):
     hooks = cfg.solver.hooks
 
-    def _get_hock(hook):
+    def _get_hook(hook):
         if hook == 'WeightDecay':
             return WeightDecay(cfg.solver.weight_decay)
+        elif hook == 'GradientClipping':
+            return GradientClipping(cfg.solver.gradient_clipping_thresh)
         else:
-            raise ValueError('Not support `hock`: {}.'.format(hook))
+            raise ValueError('Not support `hook`: {}.'.format(hook))
 
     for hook in hooks:
-        optimizer.add_hook(_get_hock(hook))
+        optimizer.add_hook(_get_hook(hook))
     return optimizer

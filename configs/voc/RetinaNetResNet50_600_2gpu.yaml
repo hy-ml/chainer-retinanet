@@ -12,6 +12,7 @@ solver:
   base_lr: 0.005  # 0.02 / 4
   n_iteration: 60000
   lr_step: [40000, 50000]
+  hooks: ['WeightDecay', 'GradientClipping']
 
 n_gpu: 2
 n_sample_per_gpu: 2

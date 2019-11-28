@@ -9,6 +9,7 @@ _C.model.type = ''
 _C.model.pretrained_model = 'imagenet'
 _C.model.min_size = 800
 _C.model.max_size = 1333
+
 # loss
 _C.model.loc_loss = 'SmoothL1'
 _C.model.conf_loss = 'FocalLoss'
@@ -16,6 +17,7 @@ _C.model.focal_loss_alpha = 0.25
 _C.model.focal_loss_gamma = 2.0
 _C.model.fg_thresh = 0.5
 _C.model.bg_thresh = 0.4
+
 # suppression
 _C.model.suppressor = 'NMS'
 _C.model.nms_thresh = 0.5
@@ -40,6 +42,8 @@ _C.solver.momentum = 0.9
 _C.solver.hooks = ['WeightDecay']
 _C.solver.n_iteration = 90000
 _C.solver.lr_step = [60000, 80000]
+# when you use gradient clip, you must add GradientClipping to _C.solver.hooks
+_C.solver.gradient_clipping_thresh = 5
 
 # misc
 _C.n_gpu = 8

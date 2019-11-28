@@ -14,7 +14,7 @@ from utils.path import get_outdir, get_logdir
 from extensions import LogTensorboard
 from setup_helpers import setup_dataset
 from setup_helpers import setup_model, setup_train_chain, freeze_params
-from setup_helpers import setup_optimizer, add_hock_optimizer
+from setup_helpers import setup_optimizer, add_hook_optimizer
 
 
 def converter(batch, device=None):
@@ -82,7 +82,7 @@ def main():
     optimizer = chainermn.create_multi_node_optimizer(
         setup_optimizer(cfg), comm)
     optimizer = optimizer.setup(train_chain)
-    optimizer = add_hock_optimizer(optimizer, cfg)
+    optimizer = add_hook_optimizer(optimizer, cfg)
     freeze_params(cfg, train_chain.model)
 
     updater = training.updaters.StandardUpdater(

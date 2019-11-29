@@ -1,0 +1,17 @@
+model:
+  type: 'RetinaNetResNet101'
+  min_size: 600
+  max_size: 1000
+
+dataset:
+  train: 'COCO'
+  eval: 'COCO'
+  n_fg_class: 80
+
+solver:
+  base_lr: 0.00125  # 0.02 / 8
+  n_iteration: 90000
+  lr_step: [60000, 80000]
+
+n_gpu: 2
+n_sample_per_gpu: 8

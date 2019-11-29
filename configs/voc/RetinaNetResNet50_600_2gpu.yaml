@@ -5,7 +5,7 @@ model:
 
 dataset:
   train: 'VOC'
-  val: 'VOC'
+  eval: 'VOC'
   n_fg_class: 20
 
 solver:

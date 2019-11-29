@@ -58,13 +58,15 @@ class RetinaNet(Chain):
         return anchors, locs, confs, scales
 
     def predict(self, x):
-        x, scales, sizes = self._prepare(x)
-        hs = self._forward_extractor(x)
-        anchors = self.xp.vstack([self.anchors(h.shape[2:] for h in hs)[
-                                 self.xp.newaxis] for _ in range(len(sizes))])
-        locs, confs = self._forward_heads(hs)
-        scores = F.sigmoid(F.max(confs, axis=-1))
-        labels = F.argmax(confs, -1)
+        with chainer.using_config('train', False), chainer.no_backprop_mode():
+            x, scales, sizes = self._prepare(x)
+            hs = self._forward_extractor(x)
+            anchors = self.xp.vstack(
+                [self.anchors(h.shape[2:] for h in hs)[
+                    self.xp.newaxis] for _ in range(len(sizes))])
+            locs, confs = self._forward_heads(hs)
+            scores = F.sigmoid(F.max(confs, axis=-1))
+            labels = F.argmax(confs, -1)
 
         locs = locs.array
         labels = labels.array

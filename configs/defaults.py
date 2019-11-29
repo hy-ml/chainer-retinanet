@@ -30,7 +30,7 @@ _C.model.freeze_param = [
 # dataset
 _C.dataset = CN()
 _C.dataset.train = ''
-_C.dataset.val = ''
+_C.dataset.eval = ''
 _C.dataset.n_fg_class = 0
 
 # solver

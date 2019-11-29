@@ -5,7 +5,7 @@ model:
 
 dataset:
   train: 'COCO'
-  val: 'COCO'
+  eval: 'COCO'
   n_fg_class: 80
 
 solver:

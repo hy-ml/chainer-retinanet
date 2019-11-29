@@ -1,0 +1,19 @@
+model:
+  type: 'RetinaNetResNet101'
+  min_size: 600
+  max_size: 1000
+
+dataset:
+  train: 'VOC'
+  eval: 'VOC'
+  n_fg_class: 20
+
+solver:
+  base_lr: 0.005  # 0.02 / 4
+  n_iteration: 60000
+  lr_step: [40000, 50000]
+  hooks: ['WeightDecay', 'GradientClipping']
+
+n_gpu: 2
+n_sample_per_gpu: 2
+n_worker: 2

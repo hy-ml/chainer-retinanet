@@ -1,0 +1,10 @@
+COCO:
+  '2017':
+    train: true
+    val: true
+VOC:
+  '2007':
+    test: false
+    trainval: true
+  '2012':
+    trainval: true

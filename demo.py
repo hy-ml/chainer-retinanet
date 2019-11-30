@@ -37,7 +37,7 @@ def main():
 
     # load pretrained model
     if args.pretrained_model == 'auto':
-        save_dir = os.path.join('./out/donwload', cfg.dataset.train)
+        save_dir = os.path.join('./out/download', cfg.dataset.train)
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
         pretrained_model = os.path.join(save_dir, cfg.model.type)

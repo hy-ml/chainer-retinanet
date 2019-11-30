@@ -34,6 +34,8 @@ def main():
     cfg.freeze()
 
     model = setup_model(cfg)
+
+    # load pretrained model
     if args.pretrained_model == 'auto':
         save_dir = os.path.join('./out/donwload', cfg.dataset.train)
         if not os.path.isdir(save_dir):
@@ -48,6 +50,7 @@ def main():
         pretrained_model = os.path.join(get_outdir(
             args.config), 'model_iter_{}'.format(cfg.solver.n_iteration))
     serializers.load_npz(pretrained_model, model)
+
     model.use_preset(args.use_preset)
     if args.gpu >= 0:
         model.to_gpu(args.gpu)

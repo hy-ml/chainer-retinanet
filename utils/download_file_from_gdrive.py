@@ -9,11 +9,15 @@ def download_file_from_gdrive(id, destination):
     response = session.get(URL, params={'id': id}, stream=True)
     token = _get_confirm_token(response)
 
+    print('Donwloading now ...')
     if token:
         params = {'id': id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
-
-    _save_response_content(response, destination)
+        _save_response_content(response, destination)
+        print('Sucess downloading.')
+    else:
+        print('Failed to download.')
+        exit(-1)
 
 
 def _get_confirm_token(response):

@@ -39,7 +39,7 @@ _C.solver.optimizer = 'MomentumSGD'
 _C.solver.base_lr = 0.00125  # 0.02 / 16
 _C.solver.weight_decay = 0.0001
 _C.solver.momentum = 0.9
-_C.solver.hooks = ['WeightDecay']
+_C.solver.hooks = ['WeightDecay', 'GradientClipping']
 _C.solver.n_iteration = 90000
 _C.solver.lr_step = [60000, 80000]
 # when you use gradient clip, you must add GradientClipping to _C.solver.hooks

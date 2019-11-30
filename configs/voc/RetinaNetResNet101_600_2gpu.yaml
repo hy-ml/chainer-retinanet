@@ -1,5 +1,5 @@
 model:
-  type: 'RetinaNetResNet50'
+  type: 'RetinaNetResNet101'
   min_size: 600
   max_size: 1000
 

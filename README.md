@@ -35,7 +35,7 @@ Assume that you use Anaconda and python3.
 
 1. Clone this repository.
 2. (Optional) Install CUDA-Aware MPI when you use multi GPUs.
-Please reference [ChainerMN installation guide](https://chainermn.readthedocs.io/en/stable/installation/guide.html).
+Please reference to [ChainerMN installation guide](https://chainermn.readthedocs.io/en/stable/installation/guide.html).
 If you do not train model, you will not need CUDA-Aware MPI.
 3. Fix requirements.txt.
 
@@ -102,5 +102,5 @@ When you execute evaluation and demo program with trained model yourself, the la
 
 ## Acknowledgements
 
-- I refererenced from other framework RetinaNet implementations ([fizyr/keras-retinanet](https://github.com/fizyr/keras-retinanet), [yhenon/pytorch-retinanet](https://github.com/yhenon/pytorch-retinanet))
+- I refererenced to other framework RetinaNet implementations ([fizyr/keras-retinanet](https://github.com/fizyr/keras-retinanet), [yhenon/pytorch-retinanet](https://github.com/yhenon/pytorch-retinanet))
 - Significant amounts of code are borrowed from the [chainer/chainercv](https://github.com/chainer/chainercv)

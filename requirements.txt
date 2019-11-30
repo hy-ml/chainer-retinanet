@@ -4,7 +4,10 @@ opencv-python
 PyYAML
 yacs
 
+# --- fix here ---
 cupy-cuda100 == 6.4.0
+mpi4py
+# ----------------
 chainer == 6.4.0
 chainercv == 0.13.1
 

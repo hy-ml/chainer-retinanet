@@ -1,0 +1,12 @@
+numpy
+Pillow
+opencv-python
+PyYAML
+yacs
+
+cupy-cuda100 == 6.4.0
+chainer == 6.4.0
+chainercv == 0.13.1
+
+tensorboard
+tensorboardX

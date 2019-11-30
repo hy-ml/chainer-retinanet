@@ -22,8 +22,8 @@ def parse_args():
                         help='GPU ID. `-1` means CPU.')
     parser.add_argument('--use_preset', type=str, default='visualize',
                         choices=['visualize', 'evaluate'])
-    parser.add_argument('--split', type=str, default='val',
-                        choices=['train', 'val'])
+    parser.add_argument('--split', type=str, default='eval',
+                        choices=['train', 'eval'])
     args = parser.parse_args()
     return args
 
@@ -39,8 +39,9 @@ def main():
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
         pretrained_model = os.path.join(save_dir, cfg.model.type)
-        gdrive_id = gdrive_ids[cfg.dataset.train][cfg.model.type]
-        download_file_from_gdrive(gdrive_id, pretrained_model)
+        if not os.path.isfile(pretrained_model):
+            gdrive_id = gdrive_ids[cfg.dataset.train][cfg.model.type]
+            download_file_from_gdrive(gdrive_id, pretrained_model)
     elif args.pretrained_model:
         pretrained_model = args.pretrained_model
     else:
@@ -51,7 +52,7 @@ def main():
     if args.gpu >= 0:
         model.to_gpu(args.gpu)
     dataset = setup_dataset(cfg, args.split)
-    visualizer = Visualizer(cfg.dataset.val)
+    visualizer = Visualizer(cfg.dataset.eval)
 
     for data in dataset:
         img = data[0]

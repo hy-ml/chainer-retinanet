@@ -1,12 +1,11 @@
-import os
 import argparse
 import cv2
-from chainer import serializers
 
 from configs import cfg
 from setup_helpers import setup_model, setup_dataset
 from utils.load_pretrained_model import load_pretrained_model
 from utils.visualizer import Visualizer
+from utils.webcam import WebCam
 
 
 def parse_args():
@@ -15,6 +14,11 @@ def parse_args():
                         help='Path to the config file.')
     parser.add_argument('--pretrained_model', type=str,
                         help='Path to the pretrained model.')
+    parser.add_argument('--indir', type=str,
+                        help='Path to the directory of input images.')
+    parser.add_argument('--webcam', action='store_true',
+                        help='Whether to demo with webcam. '
+                             'Action is `store_ture`.')
     parser.add_argument('--gpu', type=int, default=0,
                         help='GPU ID. `-1` means CPU.')
     parser.add_argument('--use_preset', type=str, default='visualize',
@@ -36,10 +40,17 @@ def main():
     model.use_preset(args.use_preset)
     if args.gpu >= 0:
         model.to_gpu(args.gpu)
-    dataset = setup_dataset(cfg, args.split)
+
+    if args.webcam:
+        data_iter = WebCam()
+        data_iter.start_device()
+    elif args.indir is not None:
+        pass
+    else:
+        data_iter = setup_dataset(cfg, args.split)
     visualizer = Visualizer(cfg.dataset.eval)
 
-    for data in dataset:
+    for data in data_iter:
         img = data[0]
         output = [[v[0][:10]] for v in model.predict([img.copy()])]
         result = visualizer.visualize(img, output)
@@ -49,6 +60,8 @@ def main():
         if key == ord('q'):
             break
     cv2.destroyAllWindows()
+    if args.webcam:
+        data_iter.stop_device()
 
 
 if __name__ == '__main__':

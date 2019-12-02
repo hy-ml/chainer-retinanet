@@ -9,7 +9,7 @@ def download_file_from_gdrive(id, destination):
     response = session.get(URL, params={'id': id}, stream=True)
     token = _get_confirm_token(response)
 
-    print('Donwloading now ...')
+    print('Donwloading from Google Drive ...')
     if token:
         params = {'id': id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)

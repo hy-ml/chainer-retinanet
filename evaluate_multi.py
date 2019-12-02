@@ -7,6 +7,7 @@ import chainermn
 
 from configs import cfg
 from utils.path import get_outdir
+from utils.load_pretrained_model import load_pretrained_model
 from setup_helpers import setup_dataset, setup_model
 from evaluate import eval_coco, eval_voc
 
@@ -32,16 +33,9 @@ def main():
     device = comm.intra_rank
 
     model = setup_model(cfg)
+    load_pretrained_model(cfg, args.config, model, args.pretrained_model)
     dataset = setup_dataset(cfg, 'eval')
 
-    # load pretrained model
-    if args.pretrained_model is not None:
-        pretrained_model = args.pretrained_model
-    else:
-        pretrained_model = os.path.join(
-            get_outdir(args.config),
-            'model_iter_{}'.format(cfg.solver.n_iteration))
-    chainer.serializers.load_npz(pretrained_model, model)
     model.use_preset('evaluate')
     chainer.cuda.get_device_from_id(device).use()
     model.to_gpu()

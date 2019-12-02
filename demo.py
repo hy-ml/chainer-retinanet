@@ -4,11 +4,9 @@ import cv2
 from chainer import serializers
 
 from configs import cfg
-from configs.path_catalog import gdrive_ids
 from setup_helpers import setup_model, setup_dataset
+from utils.load_pretrained_model import load_pretrained_model
 from utils.visualizer import Visualizer
-from utils.path import get_outdir
-from utils.download_file_from_gdrive import download_file_from_gdrive
 
 
 def parse_args():
@@ -33,22 +31,7 @@ def main():
     cfg.freeze()
 
     model = setup_model(cfg)
-
-    # load pretrained model
-    if args.pretrained_model == 'auto':
-        save_dir = os.path.join('./out/download', cfg.dataset.train)
-        if not os.path.isdir(save_dir):
-            os.makedirs(save_dir)
-        pretrained_model = os.path.join(save_dir, cfg.model.type)
-        if not os.path.isfile(pretrained_model):
-            gdrive_id = gdrive_ids[cfg.dataset.train][cfg.model.type]
-            download_file_from_gdrive(gdrive_id, pretrained_model)
-    elif args.pretrained_model:
-        pretrained_model = args.pretrained_model
-    else:
-        pretrained_model = os.path.join(get_outdir(
-            args.config), 'model_iter_{}'.format(cfg.solver.n_iteration))
-    serializers.load_npz(pretrained_model, model)
+    load_pretrained_model(cfg, args.config, model, args.pretrained_model)
 
     model.use_preset(args.use_preset)
     if args.gpu >= 0:

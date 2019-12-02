@@ -7,7 +7,7 @@ from chainercv.evaluations import eval_detection_voc, eval_detection_coco
 from chainercv.utils import apply_to_iterator, ProgressHook
 
 from configs import cfg
-from utils.path import get_outdir
+from utils.load_pretrained_model import load_pretrained_model
 from setup_helpers import setup_model, setup_dataset
 
 
@@ -63,18 +63,12 @@ def main():
     cfg.freeze
 
     model = setup_model(cfg)
+    load_pretrained_model(cfg, args.config, model, args.pretrained_model)
+
     dataset = setup_dataset(cfg, 'eval')
     iterator = iterators.MultithreadIterator(
         dataset, args.batchsize, repeat=False, shuffle=False)
 
-    # load pretrained model
-    if args.pretrained_model is not None:
-        pretrained_model = args.pretrained_model
-    else:
-        pretrained_model = os.path.join(
-            get_outdir(args.config),
-            'model_iter_{}'.format(cfg.solver.n_iteration))
-    chainer.serializers.load_npz(pretrained_model, model)
     model.use_preset('evaluate')
     if args.gpu >= 0:
         model.to_gpu(args.gpu)

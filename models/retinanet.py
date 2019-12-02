@@ -28,7 +28,7 @@ class RetinaNet(Chain):
 
     def use_preset(self, preset):
         if preset == 'visualize':
-            self.score_thresh = 0.7
+            self.score_thresh = 0.5
         elif preset == 'evaluate':
             self.score_thresh = 0.1
         else:

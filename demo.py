@@ -1,11 +1,12 @@
 import argparse
+import numpy as np
 import cv2
 
 from configs import cfg
 from setup_helpers import setup_model, setup_dataset
 from utils.load_pretrained_model import load_pretrained_model
 from utils.visualizer import Visualizer
-from utils.webcam import WebCam
+from utils.data_iter import WebCamIter, DirectoryIter
 
 
 def parse_args():
@@ -42,21 +43,27 @@ def main():
         model.to_gpu(args.gpu)
 
     if args.webcam:
-        data_iter = WebCam()
+        data_iter = WebCamIter()
         data_iter.start_device()
+        wait = 1
     elif args.indir is not None:
-        pass
+        data_iter = DirectoryIter(args.indir)
+        wait = 0
     else:
         data_iter = setup_dataset(cfg, args.split)
+        wait = 0
     visualizer = Visualizer(cfg.dataset.eval)
 
     for data in data_iter:
-        img = data[0]
+        if type(data) == tuple:
+            img = data[0]
+        else:
+            img = data
         output = [[v[0][:10]] for v in model.predict([img.copy()])]
         result = visualizer.visualize(img, output)
 
         cv2.imshow('result', result)
-        key = cv2.waitKey(0) & 0xff
+        key = cv2.waitKey(wait) & 0xff
         if key == ord('q'):
             break
     cv2.destroyAllWindows()

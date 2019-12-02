@@ -1,4 +1,3 @@
-import os
 import argparse
 import chainer
 from chainer import iterators
@@ -6,7 +5,6 @@ from chainercv.utils import apply_to_iterator, ProgressHook
 import chainermn
 
 from configs import cfg
-from utils.path import get_outdir
 from utils.load_pretrained_model import load_pretrained_model
 from setup_helpers import setup_dataset, setup_model
 from evaluate import eval_coco, eval_voc

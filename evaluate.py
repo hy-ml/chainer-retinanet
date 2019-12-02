@@ -1,6 +1,4 @@
-import os
 import argparse
-import chainer
 from chainer import iterators
 from chainercv.datasets import voc_bbox_label_names
 from chainercv.evaluations import eval_detection_voc, eval_detection_coco

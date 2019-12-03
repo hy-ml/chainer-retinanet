@@ -1,6 +1,6 @@
 import chainer
 import chainer.functions as F
-from utils.bbox import calc_iou
+from chainercv.utils import bbox_iou
 
 
 class RetinaNetTrainChain(chainer.Chain):
@@ -46,7 +46,7 @@ class RetinaNetTrainChain(chainer.Chain):
         for anchor, loc, conf, gt_bbox, gt_label in zip(
                 anchors, locs, confs, gt_bboxes, gt_labels):
             if gt_label.shape[0] > 0:
-                iou = calc_iou(anchor, gt_bbox)
+                iou = bbox_iou(anchor, gt_bbox)
                 max_iou = self.xp.max(iou, axis=-1)
                 max_iou_indices = self.xp.argmax(iou, axis=-1)
             else:  # guard no annotation

@@ -47,7 +47,7 @@ If you train models in COCO using this repository, it would be very helpful if y
 ## Installation
 
 You can choose two options: Docker and Local.
-I recommend to execute a train script in a docker container because ChainerMN is save a lot of training time, CUDA-Aware MPI (ChianerMN need CUDA-Aware MPI) installing is a little messy, and you have to install it as root user.
+I recommend to execute a train script in a docker container because ChainerMN saves a lot of training time, CUDA-Aware MPI (ChianerMN need CUDA-Aware MPI) installing is a little messy, and you have to install it as root user.
 
 ### Docker
 
@@ -69,7 +69,7 @@ Follwoing docker images are avairable.
 
 | OS | CUDA Version | Image path |
 |:-:|:-:|:-:|
-| Ubuntu18.04 | CUDA10.1 | hymldocker/chainer:6.5.0-ubuntu16.04-cuda10.1 |
+| Ubuntu18.04 | CUDA10.1 | hymldocker/chainer:6.5.0-ubuntu18.04-cuda10.1 |
 | Ubuntu16.04 | CUDA10.1 | hymldocker/chainer:6.5.0-ubuntu16.04-cuda10.1 |
 
 #### Build image

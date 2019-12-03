@@ -106,14 +106,14 @@ pip install -r requirements.txt
 Fix `coco_dir` and `voc_dir` in `configs/path_catalog.py` according to path to the datasets in your environments.
 If you already downloaded the datasets, these are automatically loaded.
 If you do not yet download the datasets, these are automatically downloaded to `coco_dir` and `voc_dir`.
-So, you do not need to donwload COCO and VOC.
+Therefore, you do not need to donwload COCO and VOC.
 
 ## Demo
 
-Demo with evaluation dataset.
-
 If you want to demo using models trained by me, please specify --pretrained_model as auto.
 If spefied this option, models trained by me is donwloaded and used automatically.
+
+Demo with evaluation dataset.
 
 ```bash
 python demo.py <path/to/config> --pretrained_model <path/to/pretrained_model>

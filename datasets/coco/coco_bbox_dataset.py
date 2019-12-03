@@ -1,5 +1,4 @@
-from chainercv.datasets.coco.coco_instances_base_dataset import \
-    COCOInstancesBaseDataset
+from datasets.coco.coco_instances_base_dataset import COCOInstancesBaseDataset
 
 
 class COCOBboxDataset(COCOInstancesBaseDataset):

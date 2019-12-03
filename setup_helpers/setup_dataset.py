@@ -1,10 +1,7 @@
 from chainer.datasets import ConcatenatedDataset
-# from datasets import COCOBboxDataset
-from chainercv.datasets import COCOBboxDataset
-# from chainercv.datasets import VOCBboxDataset
-from datasets import VOCBboxDataset
 
-from configs.path_catalog import coco_dir
+from datasets import COCOBboxDataset
+from datasets import VOCBboxDataset
 
 
 def setup_dataset(cfg, split):

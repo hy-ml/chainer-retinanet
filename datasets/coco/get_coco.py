@@ -1,12 +1,10 @@
 import filelock
 import os
-import yaml
 from chainercv import utils
 
 from configs.path_catalog import coco_dir
 
 
-flag_file = '.downloaded.yaml'
 img_urls = {
     '2014': {
         'train': 'http://msvocds.blob.core.windows.net/coco2014/train2014.zip',
@@ -42,13 +40,10 @@ panoptic_anno_url = 'http://images.cocodataset.org/annotations/' +\
 
 
 def get_coco(split, img_split, year, mode):
-    with open(flag_file, 'r') as fp:
-        flag = yaml.load(fp)
-        if flag['COCO'][year][split]:
-            return coco_dir
 
     # To support ChainerMN, the target directory should be locked.
-    with filelock.FileLock(coco_dir, '.coco.lock'):
+    lockfile_path = os.path.join(coco_dir, './coco.lock')
+    with filelock.FileLock(lockfile_path):
         annos_root = os.path.join(coco_dir, 'annotations')
         img_root = os.path.join(coco_dir, 'images')
         created_img_root = os.path.join(
@@ -81,8 +76,6 @@ def get_coco(split, img_split, year, mode):
             if not os.path.exists(pixelmap_path):
                 utils.extractall(pixelmap_path + '.zip', annos_root, '.zip')
 
-    with open(flag_file, 'w') as fp:
-        flag['COCO'][year][split] = True
-        yaml.dump(flag, fp)
-
+    if os.path.isfile(lockfile_path):
+        os.remove(lockfile_path)  # remove lockfile
     return coco_dir

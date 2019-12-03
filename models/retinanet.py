@@ -101,13 +101,10 @@ class RetinaNet(Chain):
                 anchor[:, 2:] += anchor[:, :2]
                 _anchors.append(np.array(
                     anchor[:, np.newaxis, :], dtype=np.float32))
-            # anchors.append(self.xp.vstack(_anchors))
             anchors.append(np.concatenate(
                 _anchors, axis=-2).reshape((-1, 4)))
         anchors = np.vstack(anchors)
         anchors = self.xp.array(anchors)
-        # anchors = self.xp.concatenate(anchors, axis=-2)
-        # anchors = anchors.reshape(-1, 4)
         return anchors
 
     def _prepare(self, imgs):

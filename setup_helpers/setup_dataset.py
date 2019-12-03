@@ -1,9 +1,7 @@
 from chainer.datasets import ConcatenatedDataset
-# from datasets import COCOBboxDataset
-from chainercv.datasets import COCOBboxDataset
-from chainercv.datasets import VOCBboxDataset
 
-from configs.path_catalog import coco_dir
+from datasets import COCOBboxDataset
+from datasets import VOCBboxDataset
 
 
 def setup_dataset(cfg, split):
@@ -16,10 +14,10 @@ def setup_dataset(cfg, split):
 
     if dataset_type == 'COCO':
         if split == 'train':
-            dataset = COCOBboxDataset(coco_dir, 'train', year='2017')
+            dataset = COCOBboxDataset(split='train', year='2017')
         elif split == 'eval':
             dataset = COCOBboxDataset(
-                coco_dir, 'val', year='2017', use_crowded=True,
+                split='val', year='2017', use_crowded=True,
                 return_area=True, return_crowded=True)
         else:
             raise ValueError()

@@ -6,8 +6,9 @@ import PIL.Image
 import PIL.ImageDraw
 
 from chainercv.chainer_experimental.datasets.sliceable import GetterDataset
-from chainercv.datasets.coco.coco_utils import get_coco
 from chainercv import utils
+
+from datasets.coco.get_coco import get_coco
 
 try:
     from pycocotools import mask as coco_mask

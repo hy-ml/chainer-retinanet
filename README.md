@@ -4,9 +4,17 @@ Chainer implementation of RetinaNet object detection as described in [Focal Loss
 
 There is other framework RetinaNet implementations ([Keras](https://github.com/fizyr/keras-retinanet), [PyTorch]()).
 
+
 ## Result
 
 ### MS COCO2017 Val
+
+I have not yet evaluate in COCO because I do not have enough computational resources to train COCO in local environments.
+I plan to use GCP to train models.
+But I need some time because I am a student and do not have enough money, so please wait.
+Sorry...
+
+If you train models in COCO using this repository, it would be very helpful if you send pre-trained model with config file used when training.
 
 | Model | Train dataset | mmAP |
 |:-:|:-:|:-:|
@@ -22,14 +30,56 @@ There is other framework RetinaNet implementations ([Keras](https://github.com/f
 
 ## Pre-trained model
 
+COCO pre-trained model is not yet available because I do not have enough computational resources to train COCO in local environments.
+I plan to use GCP to train models.
+But I need some time because I am a student and do not have enough money, so please wait.
+Sorry...
+
+If you train models in COCO using this repository, it would be very helpful if you send pre-trained model with config file used when training.
+
 | Train dataset | Model |
 |:-:|:-:|
-| COCO2017 train | [RetinaNet ResNet50](https://drive.google.com/open?id=1jQJSnkMidiIzQnulwK8VgOum3AGnEHDy)
-| COCO2017 train | [RetinaNet ResNet101](https://drive.google.com/open?id=1Bg3_8i3BIQcHoFHPoxGdC3ehZ215zmH-)
-| VOC2007\&2012 trainval | [RetinaNet ResNet50]() |
-| VOC2007\&2012 trainval | [RetinaNet ResNet101]() |
+| COCO2017 train | [~~RetinaNet ResNet50~~]()
+| COCO2017 train | [~~RetinaNet ResNet101~~]()
+| VOC2007\&2012 trainval | [RetinaNet ResNet50](https://drive.google.com/open?id=1jQJSnkMidiIzQnulwK8VgOum3AGnEHDy) |
+| VOC2007\&2012 trainval | [RetinaNet ResNet101](https://drive.google.com/open?id=1Bg3_8i3BIQcHoFHPoxGdC3ehZ215zmH-) |
 
 ## Installation
+
+You can choose two options: Docker and Local.
+I recommend to execute a train script in a docker container because ChainerMN is save a lot of training time, CUDA-Aware MPI (ChianerMN need CUDA-Aware MPI) installing is a little messy, and you have to install it as root user.
+
+### Docker
+
+Install docker and nvidia-docker2.
+Please reference to [nvidia-docker2 installation guide](https://github.com/NVIDIA/nvidia-docker)
+
+#### Pull already built image
+
+There is docker images built by me.
+Plase pull docker images.
+
+```bash
+docker pull <image_path>
+```
+
+Follwoing docker images are avairable.
+
+| OS | CUDA Version | Image path |
+|:-:|:-:|:-:|
+| Ubuntu18.04 | CUDA10.1 | hymldokcer/chainer:6.5.0-ubuntu16.04-cuda10.1 |
+| Ubuntu16.04 | CUDA10.1 | hymldokcer/chainer:6.5.0-ubuntu16.04-cuda10.1 |
+
+#### Build image
+
+You can build docker image by yourself.
+
+```bash
+cd docker/<image/dir>
+docker build . -t <image_name:tag>
+```
+
+### Local
 
 Assume that you use Anaconda and python3.
 
@@ -49,9 +99,18 @@ For example, rewrite to cupy-cuda92 if your CUDA version is CUDA9.2.
 pip install -r requirements.txt
 ```
 
+## Prepare
+
+Fix `coco_dir` and `voc_dir` in `configs/path_catalog.py` according to path to the datasets in your environments.
+If you alread downloaded the datasets, these are automatically loaded.
+If you not yet download the datasets, these are automatically downloaded to `coco_dir` and `voc_dir`.
+
 ## Demo
 
 Demo with evaluation dataset.
+
+If you want to demo using models pre-trained by me, please specify --pretrained_model as auto.
+If spefied this option, models pre-trained by me is donwloaded and used automatically.
 
 ```bash
 python demo.py <path/to/config> --pretrained_model <path/to/pretrained_model>
@@ -70,6 +129,9 @@ python demo.py <path/to/config> --pretrained_model <path/to/pretrained_model> --
 ```
 
 ## Evaluation
+
+If you want to evaluate using models pre-trained by me, please specify --pretrained_model as auto.
+If spefied this option, models pre-trained by me is donwloaded and used automatically.
 
 Evaluate using a sigle GPU.
 

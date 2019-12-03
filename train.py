@@ -10,7 +10,7 @@ from utils.path import get_outdir, get_logdir
 from extensions import LogTensorboard
 from setup_helpers import setup_dataset
 from setup_helpers import setup_model, setup_train_chain, freeze_params
-from setup_helpers import setup_optimizer, add_hock_optimizer
+from setup_helpers import setup_optimizer, add_hook_optimizer
 
 
 def converter(batch, device=None):
@@ -49,8 +49,8 @@ def main():
         train_dataset, cfg.n_sample_per_gpu)
     optimizer = setup_optimizer(cfg)
     optimizer.setup(train_chain)
-    add_hock_optimizer(optimizer, cfg)
-    train_chain = freeze_params(cfg, train_chain)
+    add_hook_optimizer(optimizer, cfg)
+    freeze_params(cfg, train_chain.model)
 
     updater = training.updaters.StandardUpdater(
         train_iter, optimizer, converter=converter)

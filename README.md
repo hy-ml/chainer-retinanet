@@ -11,7 +11,7 @@ There is other framework RetinaNet implementations ([Keras](https://github.com/f
 
 I have not yet evaluate in COCO because I do not have enough computational resources to train COCO in local environments.
 I plan to use GCP to train models.
-But I need some time because I am a student and do not have enough money, so please wait.
+But I need some time because I am a student and do not afford to use it, so please wait.
 Sorry...
 
 If you train models in COCO using this repository, it would be very helpful if you send pre-trained model with config file used when training.
@@ -32,7 +32,7 @@ If you train models in COCO using this repository, it would be very helpful if y
 
 COCO pre-trained model is not yet available because I do not have enough computational resources to train COCO in local environments.
 I plan to use GCP to train models.
-But I need some time because I am a student and do not have enough money, so please wait.
+But I need some time because I am a student and do not afford to use it, so please wait.
 Sorry...
 
 If you train models in COCO using this repository, it would be very helpful if you send pre-trained model with config file used when training.

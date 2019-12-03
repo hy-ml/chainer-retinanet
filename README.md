@@ -2,7 +2,7 @@
 
 Chainer implementation of RetinaNet object detection as described in [Focal Loss for Dense Object Detection](https://arxiv.org/abs/1708.02002) by Tsung-Yi Lin, Priya Goyal, Ross Girshick, Kaiming He and Piotr Dollár.
 
-There is other framework RetinaNet implementations ([Keras](https://github.com/fizyr/keras-retinanet), [PyTorch]()).
+There is other framework RetinaNet implementations ([Keras](https://github.com/fizyr/keras-retinanet), [PyTorch](https://github.com/yhenon/pytorch-retinanet)).
 
 
 ## Result

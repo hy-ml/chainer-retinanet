@@ -50,7 +50,6 @@ def main():
     args = parse_args()
     cfg.merge_from_file(args.config)
     cfg.freeze()
-    print(cfg)
 
     if hasattr(multiprocessing, 'set_start_method'):
         multiprocessing.set_start_method('forkserver')
@@ -61,6 +60,9 @@ def main():
     comm = chainermn.create_communicator('pure_nccl')
     assert comm.size == cfg.n_gpu
     device = comm.intra_rank
+
+    if comm.rank == 0:
+        print(cfg)
 
     model = setup_model(cfg)
     train_chain = setup_train_chain(cfg, model)

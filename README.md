@@ -54,6 +54,8 @@ I recommend to execute a train script in a docker container because ChainerMN is
 Install docker and nvidia-docker2.
 Please reference to [nvidia-docker2 installation guide](https://github.com/NVIDIA/nvidia-docker)
 
+If you use docker, add `--allow-run-as-root` option when use mpiexec.
+
 #### Pull already built image
 
 There is docker images built by me.
@@ -67,12 +69,12 @@ Follwoing docker images are avairable.
 
 | OS | CUDA Version | Image path |
 |:-:|:-:|:-:|
-| Ubuntu18.04 | CUDA10.1 | hymldokcer/chainer:6.5.0-ubuntu16.04-cuda10.1 |
-| Ubuntu16.04 | CUDA10.1 | hymldokcer/chainer:6.5.0-ubuntu16.04-cuda10.1 |
+| Ubuntu18.04 | CUDA10.1 | hymldocker/chainer:6.5.0-ubuntu16.04-cuda10.1 |
+| Ubuntu16.04 | CUDA10.1 | hymldocker/chainer:6.5.0-ubuntu16.04-cuda10.1 |
 
 #### Build image
 
-You can build docker image by yourself.
+You can build a docker image by yourself.
 
 ```bash
 cd docker/<image/dir>
@@ -99,18 +101,19 @@ For example, rewrite to cupy-cuda92 if your CUDA version is CUDA9.2.
 pip install -r requirements.txt
 ```
 
-## Prepare
+## Preparation
 
 Fix `coco_dir` and `voc_dir` in `configs/path_catalog.py` according to path to the datasets in your environments.
-If you alread downloaded the datasets, these are automatically loaded.
-If you not yet download the datasets, these are automatically downloaded to `coco_dir` and `voc_dir`.
+If you already downloaded the datasets, these are automatically loaded.
+If you do not yet download the datasets, these are automatically downloaded to `coco_dir` and `voc_dir`.
+So, you do not need to donwload COCO and VOC.
 
 ## Demo
 
 Demo with evaluation dataset.
 
-If you want to demo using models pre-trained by me, please specify --pretrained_model as auto.
-If spefied this option, models pre-trained by me is donwloaded and used automatically.
+If you want to demo using models trained by me, please specify --pretrained_model as auto.
+If spefied this option, models trained by me is donwloaded and used automatically.
 
 ```bash
 python demo.py <path/to/config> --pretrained_model <path/to/pretrained_model>
@@ -130,8 +133,8 @@ python demo.py <path/to/config> --pretrained_model <path/to/pretrained_model> --
 
 ## Evaluation
 
-If you want to evaluate using models pre-trained by me, please specify --pretrained_model as auto.
-If spefied this option, models pre-trained by me is donwloaded and used automatically.
+If you want to evaluate using models trained by me, please specify --pretrained_model as auto.
+If spefied this option, models trained by me is donwloaded and used automatically.
 
 Evaluate using a sigle GPU.
 

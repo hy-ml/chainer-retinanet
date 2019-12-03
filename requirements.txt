@@ -3,12 +3,13 @@ Pillow
 opencv-python
 PyYAML
 yacs
+requests
 
 # --- fix here ---
-cupy-cuda100 == 6.4.0
+cupy-cuda100 == 6.5.0
 mpi4py
 # ----------------
-chainer == 6.4.0
+chainer == 6.5.0
 chainercv == 0.13.1
 
 tensorboard

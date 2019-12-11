@@ -1,5 +1,8 @@
 import argparse
 import multiprocessing
+import cProfile
+import io
+import pstats
 
 import chainer
 from chainer import serializers
@@ -40,6 +43,12 @@ def parse_args():
     parser.add_argument('--tensorboard', type=bool, default=True,
                         help='Whether use Tensorboard. Default is True.')
     parser.add_argument('--resume', type=str)
+    parser.add_argument('--benchmark', action='store_true',
+                        help='Benchmark option.')
+    parser.add_argument('--benchmark_n_iteration', type=int, default=500,
+                        help='Iteration in benchmark option. Default is 500.')
+    parser.add_argument('--n_print_profile', type=int, default=100,
+                        help='Default is 100.')
     args = parser.parse_args()
     return args
 
@@ -61,8 +70,13 @@ def main():
 
     train_dataset = TransformDataset(
         setup_dataset(cfg, 'train'), ('img', 'bbox', 'label'), Transform())
+    if args.benchmark:
+        shuffle = False
+    else:
+        shuffle = True
+
     train_iter = chainer.iterators.MultithreadIterator(
-        train_dataset, cfg.n_sample_per_gpu)
+        train_dataset, cfg.n_sample_per_gpu, shuffle=shuffle)
     optimizer = setup_optimizer(cfg)
     optimizer.setup(train_chain)
     add_hook_optimizer(optimizer, cfg)
@@ -70,9 +84,35 @@ def main():
 
     updater = training.updaters.StandardUpdater(
         train_iter, optimizer, converter=converter)
-    trainer = training.Trainer(
-        updater, (cfg.solver.n_iteration, 'iteration'),
-        get_outdir(args.config))
+    if args.benchmark:
+        stop_trigger = (args.benchmark_n_iteration, 'iteration')
+        outdir = 'benchmark_out'
+    else:
+        stop_trigger = (cfg.solver.n_iteration, 'iteration')
+        outdir = get_outdir(args.config)
+    trainer = training.Trainer(updater, stop_trigger, outdir)
+
+    if args.benchmark:
+        log_interval = 10, 'iteration'
+        trainer.extend(training.extensions.LogReport(trigger=log_interval))
+        trainer.extend(training.extensions.PrintReport(
+            ['epoch', 'iteration', 'main/loss',
+                'main/loss/loc', 'main/loss/conf']),
+            trigger=log_interval)
+        pr = cProfile.Profile()
+        pr.enable()
+        trainer.run()
+        pr.disable()
+        s = io.StringIO()
+        sort_by = 'tottime'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.print_stats()
+        lines = s.getvalue().split('\n')
+        for line in lines[:args.n_print_profile]:
+            print(line)
+
+        pr.dump_stats('{0}/train.cprofile'.format(outdir))
+        exit()
 
     # extention
     log_interval = 10, 'iteration'

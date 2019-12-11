@@ -1,6 +1,9 @@
 import argparse
 import multiprocessing
 import numpy as np
+import cProfile
+import io
+import pstats
 
 import chainer
 from chainer import serializers
@@ -42,6 +45,12 @@ def parse_args():
     parser.add_argument('--tensorboard', type=bool, default=True,
                         help='Whether use Tensorboard. Default is True.')
     parser.add_argument('--resume', type=str)
+    parser.add_argument('--benchmark', action='store_true',
+                        help='Benchmark option.')
+    parser.add_argument('--benchmark_n_iteration', type=int, default=500,
+                        help='Iteration in benchmark option. Default is 500.')
+    parser.add_argument('--n_print_profile', type=int, default=100,
+                        help='Default is 100.')
     args = parser.parse_args()
     return args
 
@@ -71,16 +80,22 @@ def main():
 
     train_dataset = TransformDataset(
         setup_dataset(cfg, 'train'), ('img', 'bbox', 'label'), Transform())
+    if args.benchmark:
+        shuffle = False
+    else:
+        shuffle = True
+
     if comm.rank == 0:
         indices = np.arange(len(train_dataset))
     else:
         indices = None
-    indices = chainermn.scatter_dataset(indices, comm, shuffle=True)
+
+    indices = chainermn.scatter_dataset(indices, comm, shuffle=shuffle)
     train_dataset = train_dataset.slice[indices]
     train_iter = chainer.iterators.MultiprocessIterator(
         train_dataset, cfg.n_sample_per_gpu,
         n_processes=cfg.n_worker,
-        shared_mem=100 * 1000 * 1000 * 4)
+        shared_mem=100 * 1000 * 1000 * 4, shuffle=shuffle)
     optimizer = chainermn.create_multi_node_optimizer(
         setup_optimizer(cfg), comm)
     optimizer = optimizer.setup(train_chain)
@@ -89,9 +104,38 @@ def main():
 
     updater = training.updaters.StandardUpdater(
         train_iter, optimizer, device=device, converter=converter)
-    trainer = training.Trainer(
-        updater, (cfg.solver.n_iteration, 'iteration'),
-        get_outdir(args.config))
+    if args.benchmark:
+        stop_trigger = (args.benchmark_n_iteration, 'iteration')
+        outdir = 'benchmark_out'
+    else:
+        stop_trigger = (cfg.solver.n_iteration, 'iteration')
+        outdir = get_outdir(args.config)
+    trainer = training.Trainer(updater, stop_trigger, outdir)
+
+    if args.benchmark:
+        if comm.rank == 0:
+            log_interval = 10, 'iteration'
+            trainer.extend(training.extensions.LogReport(trigger=log_interval))
+            trainer.extend(training.extensions.PrintReport(
+                ['epoch', 'iteration', 'main/loss',
+                 'main/loss/loc', 'main/loss/conf']),
+                trigger=log_interval)
+        pr = cProfile.Profile()
+        pr.enable()
+        trainer.run()
+        pr.disable()
+        s = io.StringIO()
+        sort_by = 'tottime'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+        ps.print_stats()
+        if comm.rank == 0:
+            lines = s.getvalue().split('\n')
+            for line in lines[:args.n_print_profile]:
+                print(line)
+
+        pr.dump_stats(
+            '{0}/train_multi_rank_{1}.cprofile'.format(outdir, comm.rank))
+        exit()
 
     # extention
     if comm.rank == 0:
@@ -100,8 +144,7 @@ def main():
         trainer.extend(training.extensions.observe_lr(), trigger=log_interval)
         trainer.extend(training.extensions.PrintReport(
             ['epoch', 'iteration', 'lr', 'main/loss',
-             'main/loss/loc', 'main/loss/conf',
-             ]),
+             'main/loss/loc', 'main/loss/conf']),
             trigger=log_interval)
         trainer.extend(training.extensions.ProgressBar(update_interval=10))
 

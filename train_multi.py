@@ -49,6 +49,8 @@ def parse_args():
                         help='Benchmark option.')
     parser.add_argument('--benchmark_n_iteration', type=int, default=500,
                         help='Iteration in benchmark option. Default is 500.')
+    parser.add_argument('--n_print_profile', type=int, default=100,
+                        help='Default is 100.')
     args = parser.parse_args()
     return args
 
@@ -127,8 +129,12 @@ def main():
         ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
         ps.print_stats()
         if comm.rank == 0:
-            print(s.getvalue())
-        pr.dump_stats('{0}/rank_{1}.cprofile'.format(outdir, comm.rank))
+            lines = s.getvalue().split('\n')
+            for line in lines[:args.n_print_profile]:
+                print(line)
+
+        pr.dump_stats(
+            '{0}/train_multi_rank_{1}.cprofile'.format(outdir, comm.rank))
         exit()
 
     # extention

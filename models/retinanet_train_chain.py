@@ -1,3 +1,4 @@
+import numpy as np
 import chainer
 import chainer.functions as F
 from chainercv.utils import bbox_iou
@@ -15,9 +16,21 @@ class RetinaNetTrainChain(chainer.Chain):
         self._bg_thresh = bg_thresh
 
     def forward(self, imgs, gt_bboxes, gt_labels):
-        anchors, locs, confs, scales = self.model(imgs)
+        B = len(imgs)
+        pad_size = np.array(
+            [im.shape[1:] for im in imgs]).max(axis=0)
+        pad_size = (
+            np.ceil(
+                pad_size / self.model.stride) * self.model.stride).astype(int)
+        x = np.zeros(
+            (len(imgs), 3, pad_size[0], pad_size[1]), dtype=np.float32)
+        for i, img in enumerate(imgs):
+            _, H, W = img.shape
+            x[i, :, :H, :W] = img
+        x = self.xp.array(x)
 
-        gt_bboxes = self._scale_gt_bboxes(gt_bboxes, scales)
+        anchors, locs, confs = self.model(x)
+
         gt_bboxes = [self.xp.array(gt_bbox, dtype=self.xp.float32)
                      for gt_bbox in gt_bboxes]
         gt_labels = [self.xp.array(gt_label, dtype=self.xp.int32)

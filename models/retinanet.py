@@ -13,6 +13,7 @@ class RetinaNet(Chain):
     _anchor_scales = (1, 2**(1 / 3), 2**(2 / 3))
     _std = (0.1, 0.2)
     _eps = 1e-5
+    stride = 32
 
     def __init__(self, extractor, bbox_head, min_size=800, max_size=1333,
                  suppressor=None):
@@ -24,7 +25,6 @@ class RetinaNet(Chain):
         self._scales = self.extractor.scales
         self._min_size = min_size
         self._max_size = max_size
-        self._stride = 32
 
     def use_preset(self, preset):
         if preset == 'visualize':
@@ -50,16 +50,15 @@ class RetinaNet(Chain):
             b = len(x)
         else:
             raise ValueError()
-        x, scales, _ = self._prepare(x)
         hs = self._forward_extractor(x)
         locs, confs = self._forward_heads(hs)
         anchors = self.xp.vstack([self.anchors(h.shape[2:] for h in hs)[
                                  self.xp.newaxis] for _ in range(b)])
-        return anchors, locs, confs, scales
+        return anchors, locs, confs
 
-    def predict(self, x):
+    def predict(self, imgs):
         with chainer.using_config('train', False), chainer.no_backprop_mode():
-            x, scales, sizes = self._prepare(x)
+            x, scales, sizes = self._prepare(imgs)
             hs = self._forward_extractor(x)
             anchors = self.xp.vstack(
                 [self.anchors(h.shape[2:] for h in hs)[
@@ -128,7 +127,7 @@ class RetinaNet(Chain):
         pad_size = np.array(
             [im.shape[1:] for im in resized_imgs]).max(axis=0)
         pad_size = (
-            np.ceil(pad_size / self._stride) * self._stride).astype(int)
+            np.ceil(pad_size / self.stride) * self._stride).astype(int)
         x = np.zeros(
             (len(imgs), 3, pad_size[0], pad_size[1]), dtype=np.float32)
         for i, im in enumerate(resized_imgs):

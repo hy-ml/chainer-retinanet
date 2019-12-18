@@ -7,7 +7,6 @@ import pstats
 import chainer
 from chainer import serializers
 from chainer import training
-from chainercv import transforms
 from chainercv.chainer_experimental.datasets.sliceable import TransformDataset
 
 from configs import cfg
@@ -16,24 +15,12 @@ from extensions import LogTensorboard
 from setup_helpers import setup_dataset
 from setup_helpers import setup_model, setup_train_chain, freeze_params
 from setup_helpers import setup_optimizer, add_hook_optimizer
+from setup_helpers import setup_transform
 
 
 def converter(batch, device=None):
     # do not send data to gpu (device is ignored)
     return tuple(list(v) for v in zip(*batch))
-
-
-class Transform(object):
-
-    def __call__(self, in_data):
-        img, bbox, label = in_data
-        # Flipping
-        img, params = transforms.random_flip(
-            img, x_random=True, return_param=True)
-        x_flip = params['x_flip']
-        bbox = transforms.flip_bbox(
-            bbox, img.shape[1:], x_flip=x_flip)
-        return img, bbox, label
 
 
 def parse_args():
@@ -68,8 +55,9 @@ def main():
     train_chain = setup_train_chain(cfg, model)
     train_chain.to_gpu(0)
 
+    transforms = setup_transform(cfg, model.extractor.mean)
     train_dataset = TransformDataset(
-        setup_dataset(cfg, 'train'), ('img', 'bbox', 'label'), Transform())
+        setup_dataset(cfg, 'train'), ('img', 'bbox', 'label'), transforms)
     if args.benchmark:
         shuffle = False
     else:

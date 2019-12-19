@@ -26,11 +26,11 @@ class RetinaNetTrainChain(chainer.Chain):
         for i, img in enumerate(imgs):
             _, H, W = img.shape
             x[i, :, :H, :W] = img
-        x = self.xp.array(x)
+        x = self.xp.array(x, chainer.global_config.dtype)
 
         anchors, locs, confs = self.model(x)
 
-        gt_bboxes = [self.xp.array(gt_bbox)
+        gt_bboxes = [self.xp.array(gt_bbox, dtype=self.xp.float32)
                      for gt_bbox in gt_bboxes]
         gt_labels = [self.xp.array(gt_label, dtype=self.xp.int32)
                      for gt_label in gt_labels]
@@ -75,16 +75,16 @@ class RetinaNetTrainChain(chainer.Chain):
                 self.xp.int32)
 
             _gt_bbox_fg = self.xp.array([
-                gt_bbox[i] for i in max_iou_indices_fg])
+                gt_bbox[i] for i in max_iou_indices_fg], dtype=self.xp.float32)
             if _gt_bbox_fg.shape[0] == 0:  # guard not fg anchor
-                _gt_bbox_fg = self.xp.empty((0, 4))
+                _gt_bbox_fg = self.xp.empty((0, 4), dtype=self.xp.float32)
 
             _anchors.append(
                 F.vstack((anchor[fg_mask], anchor[bg_mask])))
             _locs.append(F.vstack((loc[fg_mask], loc[bg_mask])))
             _confs.append(F.vstack((conf[fg_mask], conf[bg_mask])))
             _gt_bboxes.append(self.xp.vstack(
-                (_gt_bbox_fg, self.xp.zeros((n_bg, 4)))))
+                (_gt_bbox_fg, self.xp.zeros((n_bg, 4), dtype=self.xp.float32))))
             _gt_labels.append(
                 self.xp.hstack((_gt_label_fg, self.xp.zeros(n_bg))))
 

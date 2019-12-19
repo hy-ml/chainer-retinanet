@@ -53,7 +53,7 @@ def main():
     else:
         raise ValueError('Not support `dtype`: {}.'.format(cfg.dtype))
     chainer.cuda.set_max_workspace_size(cfg.workspace_size * 1024 * 1024)
-    chainer.global_config.autotune = cfg.autotune
+    chainer.config.autotune = cfg.autotune
     chainer.global_config.cudnn_fast_batch_normalization = \
         cfg.cudnn_fast_batch_normalization
 

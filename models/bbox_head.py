@@ -53,4 +53,9 @@ class BboxHead(chainer.Chain):
         locs = F.concat(locs, axis=1)
         confs = F.concat(confs, axis=1)
 
+        if locs.dtype == np.float16:
+            locs = F.cast(locs, np.float32)
+        if confs.dtype == np.float16:
+            confs = F.cast(confs, np.float32)
+
         return locs, confs

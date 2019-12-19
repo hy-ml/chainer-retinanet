@@ -10,6 +10,9 @@ def setup_optimizer(cfg):
     else:
         raise ValueError(
             'Not support `optimizer`: {}.'.format(cfg.solver.optimizer))
+    if cfg.dtype == 'mixed16':
+        optimizer.use_fp32_update()
+        optimizer.loss_scaling()
     return optimizer
 
 

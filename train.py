@@ -2,6 +2,7 @@ import argparse
 import multiprocessing
 import cProfile
 import io
+import numpy as np
 import pstats
 
 import chainer
@@ -44,6 +45,17 @@ def main():
     args = parse_args()
     cfg.merge_from_file(args.config)
     cfg.freeze()
+
+    if cfg.dtype == 'float32':
+        chainer.global_config.dtype = np.float32
+    elif cfg.dtype == 'mixed16':
+        chainer.global_config.dtype = chainer.mixed16
+    else:
+        raise ValueError('Not support `dtype`: {}.'.format(cfg.dtype))
+    chainer.cuda.set_max_workspace_size(cfg.workspace_size * 1024 * 1024)
+    chainer.global_config.autotune = cfg.autotune
+    chainer.global_config.cudnn_fast_batch_normalization = \
+        cfg.cudnn_fast_batch_normalization
 
     if hasattr(multiprocessing, 'set_start_method'):
         multiprocessing.set_start_method('forkserver')

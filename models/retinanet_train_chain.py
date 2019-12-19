@@ -16,14 +16,13 @@ class RetinaNetTrainChain(chainer.Chain):
         self._bg_thresh = bg_thresh
 
     def forward(self, imgs, gt_bboxes, gt_labels):
-        B = len(imgs)
         pad_size = np.array(
             [im.shape[1:] for im in imgs]).max(axis=0)
         pad_size = (
             np.ceil(
                 pad_size / self.model.stride) * self.model.stride).astype(int)
         x = np.zeros(
-            (len(imgs), 3, pad_size[0], pad_size[1]), dtype=np.float32)
+            (len(imgs), 3, pad_size[0], pad_size[1]))
         for i, img in enumerate(imgs):
             _, H, W = img.shape
             x[i, :, :H, :W] = img
@@ -31,7 +30,7 @@ class RetinaNetTrainChain(chainer.Chain):
 
         anchors, locs, confs = self.model(x)
 
-        gt_bboxes = [self.xp.array(gt_bbox, dtype=self.xp.float32)
+        gt_bboxes = [self.xp.array(gt_bbox)
                      for gt_bbox in gt_bboxes]
         gt_labels = [self.xp.array(gt_label, dtype=self.xp.int32)
                      for gt_label in gt_labels]
@@ -63,8 +62,8 @@ class RetinaNetTrainChain(chainer.Chain):
                 max_iou = self.xp.max(iou, axis=-1)
                 max_iou_indices = self.xp.argmax(iou, axis=-1)
             else:  # guard no annotation
-                max_iou = self.xp.zeros(conf.shape[0], self.xp.float32)
-                max_iou_indices = self.xp.empty(conf.shape[0], self.xp.float32)
+                max_iou = self.xp.zeros(conf.shape[0])
+                max_iou_indices = self.xp.empty(conf.shape[0])
 
             fg_mask = max_iou > self._fg_thresh
             bg_mask = max_iou < self._bg_thresh
@@ -76,9 +75,9 @@ class RetinaNetTrainChain(chainer.Chain):
                 self.xp.int32)
 
             _gt_bbox_fg = self.xp.array([
-                gt_bbox[i] for i in max_iou_indices_fg], self.xp.float32)
+                gt_bbox[i] for i in max_iou_indices_fg])
             if _gt_bbox_fg.shape[0] == 0:  # guard not fg anchor
-                _gt_bbox_fg = self.xp.empty((0, 4), self.xp.float32)
+                _gt_bbox_fg = self.xp.empty((0, 4))
 
             _anchors.append(
                 F.vstack((anchor[fg_mask], anchor[bg_mask])))
@@ -114,7 +113,7 @@ class RetinaNetTrainChain(chainer.Chain):
 
     def _calc_losses(self, locs, confs, gt_locs, gt_labels):
         batchsize = len(gt_locs)
-        gt_locs = [gt_loc.astype(self.xp.float32) for gt_loc in gt_locs]
+        gt_locs = [gt_loc for gt_loc in gt_locs]
         gt_labels = [gt_label.astype(self.xp.int32) for gt_label in gt_labels]
 
         loc_loss = 0
